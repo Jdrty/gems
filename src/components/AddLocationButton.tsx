@@ -14,7 +14,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { useApp } from '@/context/AppContext';
 
-const AddLocationButton = () => {
+interface AddLocationButtonProps {
+  onLocationAdded?: (coordinates: [number, number]) => void;
+}
+
+const AddLocationButton = ({ onLocationAdded }: AddLocationButtonProps) => {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -48,6 +52,11 @@ const AddLocationButton = () => {
     // In a real app, you would save this to your database
     // For now, we'll just show a success message
     toast.success('Location added successfully!');
+    
+    // Call the onLocationAdded callback with the new coordinates
+    if (onLocationAdded) {
+      onLocationAdded([lng, lat]);
+    }
     
     // Reset form and close dialog
     setTitle('');

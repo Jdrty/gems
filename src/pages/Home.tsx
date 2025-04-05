@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import CityMap from '@/components/CityMap';
+import { useState, useRef } from 'react';
+import CityMap, { MapRef } from '@/components/CityMap';
 import LocationDetail from '@/components/LocationDetail';
 import AddLocationButton from '@/components/AddLocationButton';
 import { Location } from '@/types/location';
@@ -14,6 +14,13 @@ import {
 const Home = () => {
   const { loading } = useApp();
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
+  const mapRef = useRef<MapRef>(null);
+
+  const handleLocationAdded = (coordinates: [number, number]) => {
+    if (mapRef.current) {
+      mapRef.current.centerOnCoordinates(coordinates);
+    }
+  };
 
   return (
     <div className="h-[calc(100vh-4rem)] p-4 md:p-6">
@@ -25,7 +32,7 @@ const Home = () => {
           <div className="p-4 h-full overflow-auto space-y-4">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold">Location Details</h2>
-              <AddLocationButton />
+              <AddLocationButton onLocationAdded={handleLocationAdded} />
             </div>
             {loading ? (
               <Skeleton className="h-[400px] rounded-lg" />
@@ -42,7 +49,7 @@ const Home = () => {
             {loading ? (
               <Skeleton className="h-full w-full rounded-lg" />
             ) : (
-              <CityMap onLocationSelect={setSelectedLocation} />
+              <CityMap ref={mapRef} onLocationSelect={setSelectedLocation} />
             )}
           </div>
         </ResizablePanel>

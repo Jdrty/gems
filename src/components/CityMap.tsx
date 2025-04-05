@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, forwardRef, useImperativeHandle } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Location } from '../types/location';
@@ -11,7 +11,11 @@ interface MapProps {
   onLocationSelect?: (location: Location) => void;
 }
 
-const CityMap = ({ onLocationSelect }: MapProps) => {
+export interface MapRef {
+  centerOnCoordinates: (coordinates: [number, number]) => void;
+}
+
+const CityMap = forwardRef<MapRef, MapProps>(({ onLocationSelect }, ref) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [mapInitialized, setMapInitialized] = useState(false);
@@ -24,6 +28,20 @@ const CityMap = ({ onLocationSelect }: MapProps) => {
   const [bearing, setBearing] = useState(-20);
   
   const mapboxToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
+
+  // Expose the centerOnCoordinates method through the ref
+  useImperativeHandle(ref, () => ({
+    centerOnCoordinates: (coordinates: [number, number]) => {
+      if (map.current) {
+        map.current.flyTo({
+          center: coordinates,
+          zoom: 16,
+          duration: 2000,
+          essential: true
+        });
+      }
+    }
+  }));
 
   // Initialize the map
   useEffect(() => {
@@ -307,6 +325,6 @@ const CityMap = ({ onLocationSelect }: MapProps) => {
       </div>
     </div>
   );
-};
+});
 
 export default CityMap;

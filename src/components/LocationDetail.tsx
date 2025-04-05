@@ -93,6 +93,20 @@ const LocationDetail = ({ location }: LocationDetailProps) => {
               </div>
             </div>
           </div>
+
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium text-muted-foreground">Coordinates</h4>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div className="flex items-center gap-2">
+                <MapPinned className="w-4 h-4 text-muted-foreground" />
+                <span>Lat: {location.latitude.toFixed(6)}°</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <MapPinned className="w-4 h-4 text-muted-foreground" />
+                <span>Long: {location.longitude.toFixed(6)}°</span>
+              </div>
+            </div>
+          </div>
         </div>
       </CardContent>
       
