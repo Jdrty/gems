@@ -116,7 +116,7 @@ const Home = () => {
               <Skeleton className="h-[400px] rounded-lg" />
             ) : (
               <ResizablePanel defaultSize={30} minSize={25} maxSize={40}>
-                <div className="h-full p-4">
+                <div className="h-full ">
                   <LocationDetail
                     location={selectedLocation}
                     onLocationSelect={handleLocationSelect}

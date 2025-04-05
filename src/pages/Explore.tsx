@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useApp } from "@/context/AppContext";
 import { Location } from "@/types/location";
-import { MapPin, Star, Clock, ArrowUpDown, Filter, X } from "lucide-react";
+import { MapPin, Star, Clock, ArrowUpDown, Filter, X, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -50,7 +50,7 @@ const CATEGORIES = [
 type SortOption = "recent" | "difficulty" | "name";
 
 const Explore = () => {
-  const { locations, loading } = useApp();
+  const { locations, loading, toggleFavorite, isLocationFavorited } = useApp();
   const [sortBy, setSortBy] = useState<SortOption>("recent");
   const [selectedDifficulties, setSelectedDifficulties] = useState<number[]>(
     []
@@ -80,6 +80,11 @@ const Explore = () => {
         selectedLocation: formattedLocation,
       },
     });
+  };
+
+  const handleToggleFavorite = (e: React.MouseEvent, location: Location) => {
+    e.stopPropagation();
+    toggleFavorite(location.id);
   };
 
   const sortLocations = (locs: Location[]) => {
@@ -324,20 +329,38 @@ const Explore = () => {
                         {location.area || "Unknown Area"}
                       </div>
                     </div>
-                    {location.difficulty_to_find && (
-                      <Badge
-                        variant="secondary"
-                        className="flex items-center gap-1"
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className={`h-8 w-8 rounded-full ${
+                          isLocationFavorited(location.id)
+                            ? "text-red-500 hover:text-red-600"
+                            : "text-muted-foreground hover:text-foreground"
+                        }`}
+                        onClick={(e) => handleToggleFavorite(e, location)}
                       >
-                        <span className="text-xs text-yellow-500">
-                          Difficulty
-                        </span>
-                        <Star className="h-3.5 w-3.5 text-yellow-500" />
-                        <span className="text-xs text-yellow-500">
-                          {location.difficulty_to_find}
-                        </span>
-                      </Badge>
-                    )}
+                        <Heart
+                          className={`h-4 w-4 ${
+                            isLocationFavorited(location.id) ? "fill-current" : ""
+                          }`}
+                        />
+                      </Button>
+                      {location.difficulty_to_find && (
+                        <Badge
+                          variant="secondary"
+                          className="flex items-center gap-1"
+                        >
+                          <span className="text-xs text-yellow-500">
+                            Difficulty
+                          </span>
+                          <Star className="h-3.5 w-3.5 text-yellow-500" />
+                          <span className="text-xs text-yellow-500">
+                            {location.difficulty_to_find}
+                          </span>
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>
