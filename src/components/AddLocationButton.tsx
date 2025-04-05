@@ -15,6 +15,29 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Plus } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+// Define categories for location types
+const CATEGORIES = [
+  { id: '1', name: 'Restaurant' },
+  { id: '2', name: 'Cafe' },
+  { id: '3', name: 'Bar' },
+  { id: '4', name: 'Park' },
+  { id: '5', name: 'Museum' },
+  { id: '6', name: 'Gallery' },
+  { id: '7', name: 'Shopping' },
+  { id: '8', name: 'Entertainment' },
+  { id: '9', name: 'Landmark' },
+  { id: '10', name: 'Nature' },
+  { id: '11', name: 'Viewpoint' },
+  { id: '12', name: 'Other' }
+];
 
 interface AddLocationButtonProps {
   onLocationAdded?: (coordinates: [number, number]) => void;
@@ -29,6 +52,7 @@ const AddLocationButton = ({ onLocationAdded }: AddLocationButtonProps) => {
   const [longitude, setLongitude] = useState('');
   const [difficulty, setDifficulty] = useState('1');
   const [isPrivate, setIsPrivate] = useState(true);
+  const [category, setCategory] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,12 +92,13 @@ const AddLocationButton = ({ onLocationAdded }: AddLocationButtonProps) => {
         address: null,
         latitude: lat,
         longitude: lng,
-        category_id: null,
+        category_id: category || null,
         is_hidden_gem: true,
         difficulty_to_find: parseInt(difficulty),
         image_url: null,
         area: null,
-        is_private: isPrivate
+        is_private: isPrivate,
+        is_user_uploaded: true
       };
       
       await addLocation(newLocation);
@@ -85,6 +110,7 @@ const AddLocationButton = ({ onLocationAdded }: AddLocationButtonProps) => {
       setLongitude('');
       setDifficulty('1');
       setIsPrivate(true);
+      setCategory('');
       
       // Close dialog
       setOpen(false);
@@ -155,6 +181,21 @@ const AddLocationButton = ({ onLocationAdded }: AddLocationButtonProps) => {
                   placeholder="Enter longitude"
                 />
               </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="category">Type of Place</Label>
+              <Select value={category} onValueChange={setCategory}>
+                <SelectTrigger id="category">
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {CATEGORIES.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="difficulty">Difficulty to Find</Label>
