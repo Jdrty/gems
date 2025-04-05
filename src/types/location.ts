@@ -12,4 +12,5 @@ export interface Location {
   image_url: string | null;
   area: string | null;
   is_private: boolean;
+  is_user_uploaded: boolean;
 } 

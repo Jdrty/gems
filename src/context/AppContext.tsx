@@ -17,6 +17,7 @@ export interface Location {
   image_url: string | null;
   area: string | null;
   is_private: boolean;
+  is_user_uploaded: boolean;
 }
 
 interface AppContextType {
@@ -59,7 +60,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
             difficulty_to_find: 1,
             image_url: 'https://example.com/cn-tower.jpg',
             area: 'Downtown Toronto',
-            is_private: false
+            is_private: false,
+            is_user_uploaded: false
           },
           {
             id: '2',
@@ -74,7 +76,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
             difficulty_to_find: 2,
             image_url: 'https://example.com/kensington.jpg',
             area: 'Kensington Market',
-            is_private: false
+            is_private: false,
+            is_user_uploaded: false
           },
           {
             id: '3',
@@ -89,7 +92,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
             difficulty_to_find: 3,
             image_url: 'https://example.com/graffiti.jpg',
             area: 'Queen Street West',
-            is_private: false
+            is_private: false,
+            is_user_uploaded: false
           }
         ];
         
@@ -284,7 +288,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         difficulty_to_find: location.difficulty_to_find || 1,
         image_url: location.image_url || null,
         area: location.area || null,
-        is_private: location.is_private !== undefined ? location.is_private : true
+        is_private: location.is_private !== undefined ? location.is_private : true,
+        is_user_uploaded: false
       };
       
       // Update the locations state with the new location

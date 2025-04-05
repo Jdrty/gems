@@ -8,7 +8,6 @@ import {
   Check,
   ChevronDown,
   ChevronRight,
-  ChevronLeft,
   MapPin,
   FolderPlus,
   Folder,
@@ -105,9 +104,9 @@ const LocationFolders = ({ onLocationSelect }: LocationFoldersProps) => {
     setCustomFolders((prev) => prev.filter((folder) => folder.id !== folderId));
   };
 
-  // Separate locations into private and public
-  const privateLocations = locations.filter((location) => location.is_private);
-  const publicLocations = locations.filter((location) => !location.is_private);
+  // Separate locations into private and public (user-uploaded)
+  const privateLocations = locations.filter(location => location.is_private);
+  const publicLocations = locations.filter(location => !location.is_private && location.is_user_uploaded);
 
   // Get locations in a specific folder
   const getLocationsInFolder = (folderId: string) => {
@@ -133,6 +132,7 @@ const LocationFolders = ({ onLocationSelect }: LocationFoldersProps) => {
             ) : (
               <ChevronRight className="h-4 w-4" />
             )}
+            <Folder className="h-4 w-4 text-purple-500" />
             <span>Private Gems</span>
             <Badge variant="outline" className="ml-2">
               {privateLocations.length}
@@ -183,6 +183,7 @@ const LocationFolders = ({ onLocationSelect }: LocationFoldersProps) => {
             ) : (
               <ChevronRight className="h-4 w-4" />
             )}
+            <Folder className="h-4 w-4 text-green-500" />
             <span>Public Gems</span>
             <Badge variant="outline" className="ml-2">
               {publicLocations.length}

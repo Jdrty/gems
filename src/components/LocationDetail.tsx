@@ -60,9 +60,9 @@ const LocationDetail = ({ location, onLocationSelect }: LocationDetailProps) => 
           <div>
             <div className="flex items-center gap-2">
               <Button
-                variant="ghost"
+                variant="default"
                 size="icon"
-                className="h-8 w-8 -ml-2 bg-green-500 hover:bg-green-600 text-white"
+                className="h-8 w-8 -ml-2 bg-green-500 hover:bg-green-600 text-white rounded-full"
                 onClick={() => onLocationSelect?.(null)}
               >
                 <ChevronLeft className="h-4 w-4" />
