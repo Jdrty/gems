@@ -139,6 +139,16 @@ const CityMap = ({ onLocationSelect }: MapProps) => {
           }
         });
 
+        // Add click handler for empty areas of the map
+        newMap.on('click', (e) => {
+          // Check if the click was on a location
+          const features = newMap.queryRenderedFeatures(e.point, { layers: ['locations'] });
+          if (features.length === 0 && onLocationSelect) {
+            // If no location was clicked, clear the selected location
+            onLocationSelect(null);
+          }
+        });
+
         // Add hover effect and popup
         let popup: mapboxgl.Popup | null = null;
         let hoveredStateId: string | null = null;
