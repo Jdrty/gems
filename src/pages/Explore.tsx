@@ -52,13 +52,24 @@ const Explore = () => {
   const navigate = useNavigate();
 
   const handleViewGem = (location: Location) => {
+    console.log('Navigating to location:', location);
+    
+    // Ensure all required properties are present and properly formatted
+    const formattedLocation = {
+      ...location,
+      latitude: Number(location.latitude),
+      longitude: Number(location.longitude),
+      difficulty_to_find: location.difficulty_to_find || 0,
+      is_hidden_gem: location.is_hidden_gem || false,
+      is_private: location.is_private || false,
+      is_user_uploaded: location.is_user_uploaded || false
+    };
+    
+    console.log('Formatted location:', formattedLocation);
+    
     navigate('/', { 
       state: { 
-        selectedLocation: {
-          ...location,
-          latitude: Number(location.latitude),
-          longitude: Number(location.longitude)
-        } 
+        selectedLocation: formattedLocation
       } 
     });
   };
