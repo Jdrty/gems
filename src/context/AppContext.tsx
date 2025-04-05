@@ -2,102 +2,65 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './AuthContext';
 import { toast } from 'sonner';
+import { Location, AppLocation } from '@/types/location';
 
-export interface Location {
-  id: string;
-  name: string;
-  description: string | null;
-  address: string | null;
-  latitude: number;
-  longitude: number;
-  city_id: string;
-  category_id: string | null;
-  is_hidden_gem: boolean;
-  difficulty_to_find: number | null;
-  image_url: string | null;
-  area: string | null;
-  is_private: boolean;
-  is_user_uploaded: boolean;
-}
+const CATEGORIES = [
+  { id: '1', name: 'Parks' },
+  { id: '2', name: 'Cafe' },
+  { id: '3', name: 'Museums' },
+  { id: '4', name: 'Landmarks' },
+  { id: '5', name: 'Shopping' },
+  { id: '6', name: 'Nature' },
+  { id: '7', name: 'Viewpoint' },
+  { id: '8', name: 'Other' }
+] as const;
 
 interface AppContextType {
-  locations: Location[];
+  locations: AppLocation[];
   loading: boolean;
   markLocationVisited: (locationId: string) => Promise<void>;
   isLocationVisited: (locationId: string) => boolean;
   visitedLocations: string[];
   isGuestMode: boolean;
   setGuestMode: (value: boolean) => void;
-  addLocation: (location: Omit<Location, 'id' | 'city_id'>) => Promise<void>;
+  addLocation: (location: Omit<Location, 'id' | 'city_id' | 'created_at' | 'updated_at'>) => Promise<void>;
+  isAddLocationOpen: boolean;
+  setAddLocationOpen: (value: boolean) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [locations, setLocations] = useState<Location[]>([]);
+  const [locations, setLocations] = useState<AppLocation[]>([]);
   const [visitedLocations, setVisitedLocations] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [isGuestMode, setGuestMode] = useState(false);
+  const [isAddLocationOpen, setAddLocationOpen] = useState(false);
   const { user } = useAuth();
 
   useEffect(() => {
     const loadLocations = async () => {
       try {
         setLoading(true);
-        // In a real app, you would fetch this from your API
-        // For now, we'll use mock data
-        const mockLocations: Location[] = [
-          {
-            id: '1',
-            city_id: '1',
-            name: 'CN Tower',
-            description: 'The iconic CN Tower offers breathtaking views of Toronto.',
-            address: '290 Bremner Blvd, Toronto, ON M5V 3L9',
-            latitude: 43.6426,
-            longitude: -79.3871,
-            category_id: '1',
-            is_hidden_gem: true,
-            difficulty_to_find: 1,
-            image_url: 'https://example.com/cn-tower.jpg',
-            area: 'Downtown Toronto',
-            is_private: false,
-            is_user_uploaded: false
-          },
-          {
-            id: '2',
-            city_id: '1',
-            name: 'Kensington Market',
-            description: 'A vibrant neighborhood known for its diverse food and culture.',
-            address: 'Kensington Ave, Toronto, ON M5T 2K2',
-            latitude: 43.6544,
-            longitude: -79.4012,
-            category_id: '2',
-            is_hidden_gem: true,
-            difficulty_to_find: 2,
-            image_url: 'https://example.com/kensington.jpg',
-            area: 'Kensington Market',
-            is_private: false,
-            is_user_uploaded: false
-          },
-          {
-            id: '3',
-            city_id: '1',
-            name: 'Graffiti Alley',
-            description: 'A colorful alley filled with street art and murals.',
-            address: 'Rush Lane, Toronto, ON M5T 2T2',
-            latitude: 43.6532,
-            longitude: -79.3947,
-            category_id: '3',
-            is_hidden_gem: true,
-            difficulty_to_find: 3,
-            image_url: 'https://example.com/graffiti.jpg',
-            area: 'Queen Street West',
-            is_private: false,
-            is_user_uploaded: false
-          }
-        ];
         
-        setLocations(mockLocations);
+        // Fetch locations from Supabase
+        const { data, error } = await supabase
+          .from('locations')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          throw error;
+        }
+
+        // Convert Location to AppLocation
+        const appLocations: AppLocation[] = (data as Location[]).map(location => ({
+          ...location,
+          is_private: false, // Default to false for existing locations
+          is_user_uploaded: false // Default to false for existing locations
+        }));
+
+        setLocations(appLocations);
       } catch (error) {
         console.error('Error loading locations:', error);
         toast.error('Failed to load locations');
@@ -278,50 +241,76 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return visitedLocations.includes(locationId);
   };
 
-  const addLocation = async (location: Omit<Location, 'id' | 'city_id'>) => {
+  const addLocation = async (location: Omit<Location, 'id' | 'city_id' | 'user_id' | 'created_at' | 'updated_at'>) => {
     try {
-      // Generate a temporary ID (in a real app, this would come from the backend)
-      const tempId = `temp-${Date.now()}`;
-      
-      // Set a default city ID (in a real app, this would be based on the user's current city)
-      const defaultCityId = '1';
-      
-      // Create the new location with the temporary ID and default city ID
-      const newLocation: Location = {
-        ...location,
-        id: tempId,
-        city_id: defaultCityId,
-        address: location.address || null,
-        category_id: location.category_id || null,
-        difficulty_to_find: location.difficulty_to_find || 1,
-        image_url: location.image_url || null,
-        area: location.area || null,
-        is_private: location.is_private !== undefined ? location.is_private : true,
-        is_user_uploaded: true  // Set to true for user-added locations
+      if (!user) {
+        throw new Error('You must be logged in to add a location');
+      }
+
+      // Prepare the location data - only include fields that exist in the Supabase schema
+      const locationData = {
+        name: location.name,
+        description: location.description,
+        address: location.address,
+        latitude: location.latitude,
+        longitude: location.longitude,
+        city_id: '1', // Default city ID for now
+        category_id: location.category_id,
+        is_hidden_gem: true,
+        difficulty_to_find: location.difficulty_to_find,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       };
-      
-      // Update the locations state with the new location
-      setLocations(prevLocations => [...prevLocations, newLocation]);
+
+      // Insert the new location into Supabase
+      const { data: newLocation, error } = await supabase
+        .from('locations')
+        .insert(locationData)
+        .select('*')
+        .single();
+
+      if (error) {
+        console.error('Supabase error:', error);
+        throw new Error(error.message);
+      }
+
+      if (!newLocation) {
+        throw new Error('Failed to create location');
+      }
+
+      // Convert the new location to AppLocation and update the local state
+      const newAppLocation: AppLocation = {
+        ...newLocation as Location,
+        is_private: true, // New locations are private by default
+        is_user_uploaded: true // New locations are always user uploaded
+      };
+
+      setLocations(prevLocations => [...prevLocations, newAppLocation]);
       
       toast.success('Location added successfully');
     } catch (error) {
       console.error('Error adding location:', error);
-      toast.error('Failed to add location');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to add location';
+      toast.error(errorMessage);
       throw error;
     }
   };
 
   return (
-    <AppContext.Provider value={{
-      locations,
-      loading,
-      markLocationVisited,
-      isLocationVisited,
-      visitedLocations,
-      isGuestMode,
-      setGuestMode,
-      addLocation
-    }}>
+    <AppContext.Provider
+      value={{
+        locations,
+        loading,
+        markLocationVisited,
+        isLocationVisited,
+        visitedLocations,
+        isGuestMode,
+        setGuestMode,
+        addLocation,
+        isAddLocationOpen,
+        setAddLocationOpen,
+      }}
+    >
       {children}
     </AppContext.Provider>
   );

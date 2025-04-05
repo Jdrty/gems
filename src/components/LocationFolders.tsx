@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useApp } from "@/context/AppContext";
-import { Location } from "@/types/location";
+import { AppLocation } from "@/types/location";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -32,7 +32,7 @@ interface CustomFolder {
 }
 
 interface LocationFoldersProps {
-  onLocationSelect: (location: Location) => void;
+  onLocationSelect: (location: AppLocation) => void;
 }
 
 const LocationFolders = ({ onLocationSelect }: LocationFoldersProps) => {

@@ -1,14 +1,14 @@
 import { useRef, useEffect, useState, forwardRef, useImperativeHandle } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { Location } from '../types/location';
+import { AppLocation } from '../types/location';
 import { useApp } from '@/context/AppContext';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { MapPin, AlertCircle } from 'lucide-react';
 
 interface MapProps {
-  onLocationSelect?: (location: Location) => void;
+  onLocationSelect?: (location: AppLocation) => void;
 }
 
 export interface MapRef {

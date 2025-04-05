@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Location } from '@/types/location';
+import { AppLocation } from '@/types/location';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -11,8 +11,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import LocationFolders from './LocationFolders';
 
 interface LocationDetailProps {
-  location: Location | null;
-  onLocationSelect?: (location: Location) => void;
+  location: AppLocation | null;
+  onLocationSelect?: (location: AppLocation) => void;
 }
 
 const LocationDetail = ({ location, onLocationSelect }: LocationDetailProps) => {

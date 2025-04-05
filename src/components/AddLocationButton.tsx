@@ -22,30 +22,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Location } from '@/types/location';
 
 // Define categories for location types
 const CATEGORIES = [
-  { id: '1', name: 'Restaurant' },
+  { id: '1', name: 'Parks' },
   { id: '2', name: 'Cafe' },
-  { id: '3', name: 'Bar' },
-  { id: '4', name: 'Park' },
-  { id: '5', name: 'Museum' },
-  { id: '6', name: 'Gallery' },
-  { id: '7', name: 'Shopping' },
-  { id: '8', name: 'Entertainment' },
-  { id: '9', name: 'Landmark' },
-  { id: '10', name: 'Nature' },
-  { id: '11', name: 'Viewpoint' },
-  { id: '12', name: 'Other' }
-];
+  { id: '3', name: 'Museums' },
+  { id: '4', name: 'Landmarks' },
+  { id: '5', name: 'Shopping' },
+  { id: '6', name: 'Nature' },
+  { id: '7', name: 'Viewpoint' },
+  { id: '8', name: 'Other' }
+] as const;
 
 interface AddLocationButtonProps {
   onLocationAdded?: (coordinates: [number, number]) => void;
 }
 
 const AddLocationButton = ({ onLocationAdded }: AddLocationButtonProps) => {
-  const { addLocation } = useApp();
-  const [open, setOpen] = useState(false);
+  const { addLocation, isAddLocationOpen, setAddLocationOpen } = useApp();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [latitude, setLatitude] = useState('');
@@ -96,9 +92,7 @@ const AddLocationButton = ({ onLocationAdded }: AddLocationButtonProps) => {
         is_hidden_gem: true,
         difficulty_to_find: parseInt(difficulty),
         image_url: null,
-        area: null,
-        is_private: isPrivate,
-        is_user_uploaded: true
+        area: null
       };
       
       await addLocation(newLocation);
@@ -113,14 +107,12 @@ const AddLocationButton = ({ onLocationAdded }: AddLocationButtonProps) => {
       setCategory('');
       
       // Close dialog
-      setOpen(false);
+      setAddLocationOpen(false);
       
       // Notify parent component about the new location's coordinates
       if (onLocationAdded) {
         onLocationAdded([lng, lat]);
       }
-      
-      toast.success('Location added successfully');
     } catch (error) {
       console.error('Error adding location:', error);
       toast.error('Failed to add location');
@@ -128,7 +120,7 @@ const AddLocationButton = ({ onLocationAdded }: AddLocationButtonProps) => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={isAddLocationOpen} onOpenChange={setAddLocationOpen}>
       <DialogTrigger asChild>
         <Button size="sm" className="gap-2">
           <Plus className="w-4 h-4" />
