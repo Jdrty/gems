@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { useAuth } from '@/context/AuthContext';
 import { Badge } from '@/components/ui/badge';
-import { Trophy, MapPin, ChevronsUp, Clock, CalendarDays, Star } from 'lucide-react';
+import { Trophy, MapPin, ChevronsUp, Clock, CalendarDays, Star, ChartBar } from 'lucide-react';
 import { useStats } from '@/hooks/useStats';
 import { format } from 'date-fns';
 
@@ -52,22 +52,23 @@ const Stats = () => {
   }
 
   return (
-    <div className="container py-8 space-y-8">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Statistics & Achievements</h1>
+    <div className="container mx-auto max-w-7xl px-4 py-6">
+      <div className="flex items-center gap-3 mb-6">
+        <ChartBar className="h-8 w-8 text-primary" />
+        <h1 className="text-3xl font-bold tracking-tight">Statistics</h1>
       </div>
 
       {!user && <GuestPrompt />}
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="visits">Visit History</TabsTrigger>
           <TabsTrigger value="achievements">Achievements</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="overview" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <TabsContent value="overview" className="space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium">Total Visits</CardTitle>

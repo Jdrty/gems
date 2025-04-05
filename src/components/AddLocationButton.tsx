@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import {
@@ -21,6 +21,18 @@ interface AddLocationButtonProps {
   onLocationAdded?: (coordinates: [number, number]) => void;
 }
 
+// Define the form state type
+interface FormState {
+  open: boolean;
+  title: string;
+  description: string;
+  latitude: string;
+  longitude: string;
+  difficulty: number;
+}
+
+const STORAGE_KEY = 'addLocationFormState';
+
 const AddLocationButton = ({ onLocationAdded }: AddLocationButtonProps) => {
   const { addLocation } = useApp();
   const [open, setOpen] = useState(false);
@@ -39,13 +51,13 @@ const AddLocationButton = ({ onLocationAdded }: AddLocationButtonProps) => {
       return;
     }
     
-    if (!latitude.trim() || !longitude.trim()) {
+    if (!formState.latitude.trim() || !formState.longitude.trim()) {
       toast.error('Please enter valid coordinates');
       return;
     }
     
-    const lat = parseFloat(latitude);
-    const lng = parseFloat(longitude);
+    const lat = parseFloat(formState.latitude);
+    const lng = parseFloat(formState.longitude);
     
     if (isNaN(lat) || isNaN(lng)) {
       toast.error('Please enter valid numbers for coordinates');
@@ -103,7 +115,10 @@ const AddLocationButton = ({ onLocationAdded }: AddLocationButtonProps) => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog 
+      open={formState.open} 
+      onOpenChange={(open) => setFormState(prev => ({ ...prev, open }))}
+    >
       <DialogTrigger asChild>
         <Button size="sm" className="gap-2">
           <Plus className="w-4 h-4" />
@@ -190,6 +205,13 @@ const AddLocationButton = ({ onLocationAdded }: AddLocationButtonProps) => {
                 </div>
               </RadioGroup>
             </div>
+            <p className="text-xs text-muted-foreground">
+              {formState.difficulty === 1 && 'Very easy to find'}
+              {formState.difficulty === 2 && 'Easy to find'}
+              {formState.difficulty === 3 && 'Moderate difficulty'}
+              {formState.difficulty === 4 && 'Hard to find'}
+              {formState.difficulty === 5 && 'Very hard to find'}
+            </p>
           </div>
           <DialogFooter>
             <Button type="submit">Add Location</Button>
