@@ -32,13 +32,19 @@ const CityMap = forwardRef<MapRef, MapProps>(({ onLocationSelect }, ref) => {
   // Expose the centerOnCoordinates method through the ref
   useImperativeHandle(ref, () => ({
     centerOnCoordinates: (coordinates: [number, number]) => {
+      console.log('CityMap: Attempting to center on coordinates:', coordinates);
       if (map.current) {
+        console.log('CityMap: Map instance available, flying to coordinates');
         map.current.flyTo({
           center: coordinates,
           zoom: 16,
+          pitch: 52,
+          bearing: -20,
           duration: 2000,
           essential: true
         });
+      } else {
+        console.log('CityMap: Map instance not available');
       }
     }
   }));

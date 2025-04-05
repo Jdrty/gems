@@ -4,6 +4,7 @@ import { Location } from '@/types/location';
 import { MapPin, Star, Clock, ArrowUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useNavigate } from 'react-router-dom';
 import {
   Select,
   SelectContent,
@@ -19,6 +20,11 @@ type SortOption = 'recent' | 'difficulty' | 'name';
 const Explore = () => {
   const { locations, loading } = useApp();
   const [sortBy, setSortBy] = useState<SortOption>('recent');
+  const navigate = useNavigate();
+
+  const handleViewGem = (location: Location) => {
+    navigate('/', { state: { selectedLocation: location } });
+  };
 
   const sortLocations = (locs: Location[]) => {
     return [...locs].sort((a, b) => {
@@ -122,8 +128,12 @@ const Explore = () => {
                 <p className="text-muted-foreground line-clamp-2 mb-4">
                   {location.description}
                 </p>
-                <Button variant="outline" className="w-full">
-                  View Details
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => handleViewGem(location)}
+                >
+                  View Gem
                 </Button>
               </CardContent>
             </Card>

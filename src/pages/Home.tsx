@@ -1,10 +1,13 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import CityMap, { MapRef } from '@/components/CityMap';
 import LocationDetail from '@/components/LocationDetail';
 import AddLocationButton from '@/components/AddLocationButton';
 import { Location } from '@/types/location';
 import { useApp } from '@/context/AppContext';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import { ChevronLeft } from 'lucide-react';
 import {
   ResizablePanelGroup,
   ResizablePanel,
@@ -15,6 +18,23 @@ const Home = () => {
   const { loading } = useApp();
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const mapRef = useRef<MapRef>(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Handle location selection from Explore page
+  useEffect(() => {
+    if (location.state?.selectedLocation) {
+      const loc = location.state.selectedLocation;
+      console.log('Selected location from Explore:', loc);
+      setSelectedLocation(loc);
+      if (mapRef.current) {
+        console.log('Centering map on coordinates:', [loc.longitude, loc.latitude]);
+        mapRef.current.centerOnCoordinates([loc.longitude, loc.latitude]);
+      } else {
+        console.log('Map ref is not available');
+      }
+    }
+  }, [location.state]);
 
   const handleLocationAdded = (coordinates: [number, number]) => {
     if (mapRef.current) {
@@ -29,8 +49,25 @@ const Home = () => {
     }
   };
 
+  const handleBackToExplore = () => {
+    navigate('/explore');
+  };
+
   return (
     <div className="h-[calc(100vh-4rem)] p-4 md:p-6">
+      {location.state?.selectedLocation && (
+        <div className="mb-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleBackToExplore}
+            className="flex items-center gap-2"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            Back to Explore
+          </Button>
+        </div>
+      )}
       <ResizablePanelGroup
         direction="horizontal"
         className="w-full h-full gap-4"
