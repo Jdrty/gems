@@ -17,7 +17,13 @@ const CityMap = ({ onLocationSelect }: MapProps) => {
   const [mapInitialized, setMapInitialized] = useState(false);
   const { locations, isLocationVisited } = useApp();
   
-  const mapboxToken = import.meta.env.REACT_MAPBOX_ACCESS_TOKEN;
+  // Toronto coordinates
+  const [center, setCenter] = useState<[number, number]>([-79.3832, 43.6532]);
+  const [zoom, setZoom] = useState(15.5);
+  const [pitch, setPitch] = useState(52);
+  const [bearing, setBearing] = useState(-20);
+  
+  const mapboxToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
 
   // Initialize the map
   useEffect(() => {
@@ -34,13 +40,55 @@ const CityMap = ({ onLocationSelect }: MapProps) => {
       const newMap = new mapboxgl.Map({
         container: mapContainer.current,
         style: 'mapbox://styles/mapbox/dark-v11',
-        center: [-122.4194, 37.7749], // San Francisco
-        zoom: 12
+        center: center,
+        zoom: zoom,
+        pitch: pitch,
+        bearing: bearing,
+        antialias: true // Enable antialiasing for smoother rendering
       });
 
       newMap.on('load', () => {
+        // Add 3D building layer
+        newMap.addLayer({
+          'id': '3d-buildings',
+          'source': 'composite',
+          'source-layer': 'building',
+          'filter': ['==', 'extrude', 'true'],
+          'type': 'fill-extrusion',
+          'minzoom': 14,
+          'paint': {
+            'fill-extrusion-color': '#2a2a2a',
+            'fill-extrusion-height': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              15,
+              0,
+              15.05,
+              ['get', 'height']
+            ],
+            'fill-extrusion-base': ['get', 'min_height'],
+            'fill-extrusion-opacity': 0.8
+          }
+        });
+
         setMapInitialized(true);
         map.current = newMap;
+      });
+
+      // Track map movement
+      newMap.on('move', () => {
+        if (newMap) {
+          const mapCenter = newMap.getCenter();
+          const mapZoom = newMap.getZoom();
+          const mapPitch = newMap.getPitch();
+          const mapBearing = newMap.getBearing();
+
+          setCenter([mapCenter.lng, mapCenter.lat]);
+          setZoom(mapZoom);
+          setPitch(mapPitch);
+          setBearing(mapBearing);
+        }
       });
 
       newMap.addControl(new mapboxgl.NavigationControl(), 'top-right');
@@ -73,15 +121,14 @@ const CityMap = ({ onLocationSelect }: MapProps) => {
         markerElement.className = 'flex items-center justify-center';
         
         const markerInner = document.createElement('div');
-        markerInner.className = `w-8 h-8 bg-primary rounded-full flex items-center justify-center transition-all duration-300 ${
-          location.isHiddenGem ? 'bg-yellow-500' : (isLocationVisited(location.id) ? 'bg-green-500' : 'bg-primary')
-        }`;
+        const statusClass = location.isHiddenGem 
+          ? 'bg-yellow-400 shadow-[0px_0px_4px_2px_rgba(250,204,21,0.7)]' 
+          : isLocationVisited(location.id)
+            ? 'bg-green-400 shadow-[0px_0px_4px_2px_rgba(74,222,128,0.7)]'
+            : 'bg-primary shadow-[0px_0px_4px_2px_rgba(59,130,246,0.7)]';
+            
+        markerInner.className = `w-3 h-3 rounded-full ${statusClass} flex items-center justify-center transition-all duration-300`;
         
-        const icon = document.createElement('span');
-        icon.className = 'text-white';
-        icon.innerHTML = location.isHiddenGem ? '✨' : '📍';
-        
-        markerInner.appendChild(icon);
         markerElement.appendChild(markerInner);
         
         const marker = new mapboxgl.Marker(markerElement)
@@ -89,8 +136,10 @@ const CityMap = ({ onLocationSelect }: MapProps) => {
           .setPopup(
             new mapboxgl.Popup({ offset: 25 })
               .setHTML(
-                `<h3 class="font-bold text-sm">${location.name}</h3>
-                <p class="text-xs">${location.description}</p>`
+                `<div class="bg-zinc-900/95 p-2 rounded-lg border border-zinc-800">
+                  <h3 class="font-bold text-sm text-zinc-100">${location.name}</h3>
+                  <p class="text-xs text-zinc-400">${location.description}</p>
+                </div>`
               )
           )
           .addTo(map.current);
@@ -120,8 +169,22 @@ const CityMap = ({ onLocationSelect }: MapProps) => {
   }
 
   return (
-    <div className="w-full h-full rounded-lg overflow-hidden shadow-lg">
+    <div className="w-full h-full rounded-lg overflow-hidden shadow-lg relative">
       <div ref={mapContainer} className="w-full h-full" />
+      <div className="bg-zinc-900/90 absolute bottom-8 left-4 flex flex-col gap-2 p-3 rounded-lg border border-zinc-800">
+        <div className="flex items-center gap-2">
+          <div className="h-3 w-3 rounded-full bg-primary shadow-[0px_0px_4px_2px_rgba(59,130,246,0.7)]" />
+          <div className="text-sm text-zinc-300">Available</div>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="h-3 w-3 rounded-full bg-green-400 shadow-[0px_0px_4px_2px_rgba(74,222,128,0.7)]" />
+          <div className="text-sm text-zinc-300">Visited</div>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="h-3 w-3 rounded-full bg-yellow-400 shadow-[0px_0px_4px_2px_rgba(250,204,21,0.7)]" />
+          <div className="text-sm text-zinc-300">Hidden Gem</div>
+        </div>
+      </div>
     </div>
   );
 };
