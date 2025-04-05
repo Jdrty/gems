@@ -242,55 +242,6 @@ const LocationFolders = ({ onLocationSelect }: LocationFoldersProps) => {
           )}
         </div>
 
-        {/* Favorites Folder */}
-        <div className="border rounded-lg overflow-hidden">
-          <Button
-            variant="ghost"
-            className="w-full flex justify-between items-center p-4"
-            onClick={() => toggleFolder("Favorites")}
-          >
-            <div className="flex items-center gap-2">
-              {expandedFolders["Favorites"] ? (
-                <ChevronDown className="h-4 w-4" />
-              ) : (
-                <ChevronRight className="h-4 w-4" />
-              )}
-              <Star className="h-4 w-4 text-yellow-500" />
-              <span>Favorites</span>
-              <Badge variant="outline" className="ml-2">
-                {favoritedLocations.length}
-              </Badge>
-            </div>
-          </Button>
-
-          {expandedFolders["Favorites"] && (
-            <div className="p-2">
-              <div className="space-y-2">
-                {favoritedLocations.length > 0 ? (
-                  favoritedLocations.map((location) => (
-                    <Button
-                      key={location.id}
-                      variant="ghost"
-                      className="w-full justify-start gap-2"
-                      onClick={() => onLocationSelect(location)}
-                    >
-                      <MapPin className="h-4 w-4" />
-                      <span className="truncate">{location.name}</span>
-                      {isLocationVisited(location.id) && (
-                        <Check className="h-4 w-4 ml-auto text-yellow-500" />
-                      )}
-                    </Button>
-                  ))
-                ) : (
-                  <div className="text-center text-muted-foreground py-4">
-                    No favorites yet
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-
         {/* Public Gems Folder */}
         <div className="border rounded-lg overflow-hidden">
           <Button
@@ -333,6 +284,55 @@ const LocationFolders = ({ onLocationSelect }: LocationFoldersProps) => {
                 ) : (
                   <div className="text-center text-muted-foreground py-4">
                     No public gems yet
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Favorites Folder */}
+        <div className="border rounded-lg overflow-hidden">
+          <Button
+            variant="ghost"
+            className="w-full flex justify-between items-center p-4"
+            onClick={() => toggleFolder("Favorites")}
+          >
+            <div className="flex items-center gap-2">
+              {expandedFolders["Favorites"] ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
+              <Star className="h-4 w-4 text-yellow-500" />
+              <span>Favorites</span>
+              <Badge variant="outline" className="ml-2">
+                {favoritedLocations.length}
+              </Badge>
+            </div>
+          </Button>
+
+          {expandedFolders["Favorites"] && (
+            <div className="p-2">
+              <div className="space-y-2">
+                {favoritedLocations.length > 0 ? (
+                  favoritedLocations.map((location) => (
+                    <Button
+                      key={location.id}
+                      variant="ghost"
+                      className="w-full justify-start gap-2"
+                      onClick={() => onLocationSelect(location)}
+                    >
+                      <MapPin className="h-4 w-4" />
+                      <span className="truncate">{location.name}</span>
+                      {isLocationVisited(location.id) && (
+                        <Check className="h-4 w-4 ml-auto text-yellow-500" />
+                      )}
+                    </Button>
+                  ))
+                ) : (
+                  <div className="text-center text-muted-foreground py-4">
+                    No favorites yet
                   </div>
                 )}
               </div>
@@ -390,16 +390,6 @@ const LocationFolders = ({ onLocationSelect }: LocationFoldersProps) => {
             )}
           </div>
         ))}
-
-        {/* Add Folder Button */}
-        <Button
-          variant="outline"
-          className="w-full flex items-center justify-center gap-2"
-          onClick={() => setShowAddFolderDialog(true)}
-        >
-          <FolderPlus className="h-4 w-4" />
-          Add Folder
-        </Button>
       </div>
     </ScrollArea>
   );
