@@ -1,4 +1,3 @@
-
 import { useRef, useEffect, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -18,8 +17,8 @@ const CityMap = ({ onLocationSelect }: MapProps) => {
   const [mapInitialized, setMapInitialized] = useState(false);
   const { locations, isLocationVisited } = useApp();
   
-  // Use the provided Mapbox access token
-  const mapboxToken = "pk.eyJ1IjoibWljaGFlbG16bCIsImEiOiJjbTk0OG9ueHYwdnI1MmxxOHZ1bDBtNmZhIn0.Tb-FrawXi-o2HhEO9X-TDQ";
+  // Use the environment variable instead of hardcoding the token
+  const mapboxToken = process.env.REACT_APP_MAPBOX_TOKEN;
 
   useEffect(() => {
     if (!mapContainer.current || mapInitialized || !locations.length) return;
