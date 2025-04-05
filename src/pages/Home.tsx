@@ -26,13 +26,29 @@ const Home = () => {
     if (location.state?.selectedLocation) {
       const loc = location.state.selectedLocation;
       console.log('Selected location from Explore:', loc);
-      setSelectedLocation(loc);
-      if (mapRef.current) {
-        console.log('Centering map on coordinates:', [loc.longitude, loc.latitude]);
-        mapRef.current.centerOnCoordinates([loc.longitude, loc.latitude]);
-      } else {
-        console.log('Map ref is not available');
-      }
+      
+      // Ensure the location has the correct format
+      const formattedLocation = {
+        ...loc,
+        latitude: Number(loc.latitude),
+        longitude: Number(loc.longitude),
+        difficulty_to_find: loc.difficulty_to_find || 0,
+        is_hidden_gem: loc.is_hidden_gem || false,
+        is_private: loc.is_private || false,
+        is_user_uploaded: loc.is_user_uploaded || false
+      };
+      
+      setSelectedLocation(formattedLocation);
+      
+      // Use setTimeout to ensure the map is fully initialized
+      setTimeout(() => {
+        if (mapRef.current) {
+          console.log('Centering map on coordinates:', [formattedLocation.longitude, formattedLocation.latitude]);
+          mapRef.current.centerOnCoordinates([formattedLocation.longitude, formattedLocation.latitude]);
+        } else {
+          console.log('Map ref is not available');
+        }
+      }, 500);
     }
   }, [location.state]);
 
