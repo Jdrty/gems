@@ -16,6 +16,7 @@ export interface Location {
   difficulty_to_find: number | null;
   image_url: string | null;
   area: string | null;
+  is_private: boolean;
 }
 
 interface AppContextType {
@@ -41,17 +42,60 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const loadLocations = async () => {
       try {
-        const { data, error } = await supabase
-          .from('locations')
-          .select('*');
-
-        if (error) {
-          throw error;
-        }
-
-        setLocations(data);
+        setLoading(true);
+        // In a real app, you would fetch this from your API
+        // For now, we'll use mock data
+        const mockLocations: Location[] = [
+          {
+            id: '1',
+            city_id: '1',
+            name: 'CN Tower',
+            description: 'The iconic CN Tower offers breathtaking views of Toronto.',
+            address: '290 Bremner Blvd, Toronto, ON M5V 3L9',
+            latitude: 43.6426,
+            longitude: -79.3871,
+            category_id: '1',
+            is_hidden_gem: true,
+            difficulty_to_find: 1,
+            image_url: 'https://example.com/cn-tower.jpg',
+            area: 'Downtown Toronto',
+            is_private: false
+          },
+          {
+            id: '2',
+            city_id: '1',
+            name: 'Kensington Market',
+            description: 'A vibrant neighborhood known for its diverse food and culture.',
+            address: 'Kensington Ave, Toronto, ON M5T 2K2',
+            latitude: 43.6544,
+            longitude: -79.4012,
+            category_id: '2',
+            is_hidden_gem: true,
+            difficulty_to_find: 2,
+            image_url: 'https://example.com/kensington.jpg',
+            area: 'Kensington Market',
+            is_private: false
+          },
+          {
+            id: '3',
+            city_id: '1',
+            name: 'Graffiti Alley',
+            description: 'A colorful alley filled with street art and murals.',
+            address: 'Rush Lane, Toronto, ON M5T 2T2',
+            latitude: 43.6532,
+            longitude: -79.3947,
+            category_id: '3',
+            is_hidden_gem: true,
+            difficulty_to_find: 3,
+            image_url: 'https://example.com/graffiti.jpg',
+            area: 'Queen Street West',
+            is_private: false
+          }
+        ];
+        
+        setLocations(mockLocations);
       } catch (error) {
-        console.error('Failed to load locations:', error);
+        console.error('Error loading locations:', error);
         toast.error('Failed to load locations');
       } finally {
         setLoading(false);
@@ -222,21 +266,35 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return visitedLocations.includes(locationId);
   };
 
-  const addLocation = async (locationData: Omit<Location, 'id' | 'city_id'>) => {
+  const addLocation = async (location: Omit<Location, 'id' | 'city_id'>) => {
     try {
-      // In a real app, you would save this to your database
-      // For now, we'll just add it to the local state
+      // Generate a temporary ID (in a real app, this would come from the backend)
+      const tempId = `temp-${Date.now()}`;
+      
+      // Set a default city ID (in a real app, this would be based on the user's current city)
+      const defaultCityId = '1';
+      
+      // Create the new location with the temporary ID and default city ID
       const newLocation: Location = {
-        ...locationData,
-        id: `temp-${Date.now()}`, // Generate a temporary ID
-        city_id: 'toronto', // Default city ID
+        ...location,
+        id: tempId,
+        city_id: defaultCityId,
+        address: location.address || null,
+        category_id: location.category_id || null,
+        difficulty_to_find: location.difficulty_to_find || 1,
+        image_url: location.image_url || null,
+        area: location.area || null,
+        is_private: location.is_private !== undefined ? location.is_private : true
       };
       
-      setLocations(prev => [...prev, newLocation]);
-      toast.success('Location added successfully!');
+      // Update the locations state with the new location
+      setLocations(prevLocations => [...prevLocations, newLocation]);
+      
+      toast.success('Location added successfully');
     } catch (error) {
-      console.error('Failed to add location:', error);
+      console.error('Error adding location:', error);
       toast.error('Failed to add location');
+      throw error;
     }
   };
 
