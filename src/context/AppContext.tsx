@@ -27,6 +27,9 @@ interface AppContextType {
   isAddLocationOpen: boolean;
   setAddLocationOpen: (value: boolean) => void;
   deleteLocation: (locationId: string) => Promise<void>;
+  favoriteLocations: string[];
+  toggleFavorite: (locationId: string) => void;
+  isLocationFavorited: (locationId: string) => boolean;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -34,6 +37,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export function AppProvider({ children }: { children: ReactNode }) {
   const [locations, setLocations] = useState<AppLocation[]>([]);
   const [visitedLocations, setVisitedLocations] = useState<string[]>([]);
+  const [favoriteLocations, setFavoriteLocations] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [isGuestMode, setGuestMode] = useState(false);
   const [isAddLocationOpen, setAddLocationOpen] = useState(false);
@@ -77,12 +81,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // Reset visited locations when switching to guest mode
     if (isGuestMode) {
       setVisitedLocations([]);
+      setFavoriteLocations([]);
       return;
     }
 
     // Only load from database when user is logged in and not in guest mode
     if (!user || isGuestMode) {
       setVisitedLocations([]);
+      setFavoriteLocations([]);
       return;
     }
 
@@ -110,6 +116,31 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     loadVisitedLocations();
   }, [user, isGuestMode]);
+
+  // Load favorites from localStorage on initial load
+  useEffect(() => {
+    const loadFavorites = () => {
+      try {
+        const storedFavorites = localStorage.getItem('favoriteLocations');
+        if (storedFavorites) {
+          setFavoriteLocations(JSON.parse(storedFavorites));
+        }
+      } catch (error) {
+        console.error('Failed to load favorites from localStorage:', error);
+      }
+    };
+    
+    loadFavorites();
+  }, []);
+  
+  // Save favorites to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem('favoriteLocations', JSON.stringify(favoriteLocations));
+    } catch (error) {
+      console.error('Failed to save favorites to localStorage:', error);
+    }
+  }, [favoriteLocations]);
 
   const markLocationVisited = async (locationId: string) => {
     // For guest mode, just update the local state without persisting
@@ -242,6 +273,27 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return visitedLocations.includes(locationId);
   };
 
+  const isLocationFavorited = (locationId: string) => {
+    return favoriteLocations.includes(locationId);
+  };
+
+  const toggleFavorite = (locationId: string) => {
+    setFavoriteLocations(prev => {
+      const newFavorites = prev.includes(locationId)
+        ? prev.filter(id => id !== locationId)
+        : [...prev, locationId];
+      
+      // Show toast notification
+      toast.success(
+        prev.includes(locationId) 
+          ? 'Removed from favorites' 
+          : 'Added to favorites'
+      );
+      
+      return newFavorites;
+    });
+  };
+
   const addLocation = async (location: Omit<Location, 'id' | 'city_id' | 'user_id' | 'created_at' | 'updated_at'>) => {
     try {
       if (!user) {
@@ -343,7 +395,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       addLocation,
       isAddLocationOpen,
       setAddLocationOpen,
-      deleteLocation
+      deleteLocation,
+      favoriteLocations,
+      toggleFavorite,
+      isLocationFavorited
     }}>
       {children}
     </AppContext.Provider>

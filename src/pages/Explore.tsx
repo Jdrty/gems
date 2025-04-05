@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useApp } from '@/context/AppContext';
-import { Location } from '@/types/location';
-import { MapPin, Star, Clock, ArrowUpDown, Filter, X } from 'lucide-react';
+import { AppLocation } from '@/types/location';
+import { MapPin, Star, Clock, ArrowUpDown, Filter, X, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
@@ -44,14 +44,14 @@ const CATEGORIES = [
 type SortOption = 'recent' | 'difficulty' | 'name';
 
 const Explore = () => {
-  const { locations, loading } = useApp();
+  const { locations, loading, toggleFavorite, isLocationFavorited } = useApp();
   const [sortBy, setSortBy] = useState<SortOption>('recent');
   const [selectedDifficulties, setSelectedDifficulties] = useState<number[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const navigate = useNavigate();
 
-  const handleViewGem = (location: Location) => {
+  const handleViewGem = (location: AppLocation) => {
     console.log('Navigating to location:', location);
     
     // Ensure all required properties are present and properly formatted
@@ -74,7 +74,7 @@ const Explore = () => {
     });
   };
 
-  const sortLocations = (locs: Location[]) => {
+  const sortLocations = (locs: AppLocation[]) => {
     return [...locs].sort((a, b) => {
       switch (sortBy) {
         case 'recent':
@@ -296,12 +296,25 @@ const Explore = () => {
                         {location.area || 'Unknown Area'}
                       </div>
                     </div>
-                    {location.difficulty_to_find && (
-                      <Badge variant="secondary" className="flex items-center gap-1">
-                        <Star className="h-3.5 w-3.5" />
-                        {location.difficulty_to_find}
-                      </Badge>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {location.difficulty_to_find && (
+                        <Badge variant="secondary" className="flex items-center gap-1">
+                          <Star className="h-3.5 w-3.5" />
+                          {location.difficulty_to_find}
+                        </Badge>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className={`h-8 w-8 ${isLocationFavorited(location.id) ? 'text-red-500' : 'text-gray-400'}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleFavorite(location.id);
+                        }}
+                      >
+                        <Heart className={`h-4 w-4 ${isLocationFavorited(location.id) ? 'fill-current' : ''}`} />
+                      </Button>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>

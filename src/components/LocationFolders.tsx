@@ -13,6 +13,7 @@ import {
   Folder,
   Plus,
   Trash2,
+  Star,
 } from "lucide-react";
 import {
   Dialog,
@@ -39,12 +40,13 @@ interface LocationFoldersProps {
 }
 
 const LocationFolders = ({ onLocationSelect }: LocationFoldersProps) => {
-  const { locations, isLocationVisited, deleteLocation } = useApp();
+  const { locations, isLocationVisited, deleteLocation, favoriteLocations, isLocationFavorited } = useApp();
   const [expandedFolders, setExpandedFolders] = useState<
     Record<string, boolean>
   >({
-    "Private Gems": false,
-    "Public Gems": false,
+    "Private Gems": true,
+    "Public Gems": true,
+    "Favorites": true,
   });
   const [customFolders, setCustomFolders] = useState<CustomFolder[]>([]);
   const [newFolderName, setNewFolderName] = useState("");
@@ -123,6 +125,9 @@ const LocationFolders = ({ onLocationSelect }: LocationFoldersProps) => {
     );
   };
 
+  // Get favorited locations
+  const favoritedLocations = locations.filter(location => isLocationFavorited(location.id));
+
   const handleDeleteLocation = async (locationId: string) => {
     try {
       await deleteLocation(locationId);
@@ -141,6 +146,69 @@ const LocationFolders = ({ onLocationSelect }: LocationFoldersProps) => {
 
   return (
     <div className="space-y-4">
+      {/* Favorites Folder */}
+      <div className="border rounded-lg overflow-hidden">
+        <Button
+          variant="ghost"
+          className="w-full flex justify-between items-center p-4"
+          onClick={() => toggleFolder("Favorites")}
+        >
+          <div className="flex items-center gap-2">
+            {expandedFolders["Favorites"] ? (
+              <ChevronDown className="h-4 w-4" />
+            ) : (
+              <ChevronRight className="h-4 w-4" />
+            )}
+            <Star className="h-4 w-4 text-yellow-500" />
+            <span>Favorites</span>
+            <Badge variant="outline" className="ml-2">
+              {favoritedLocations.length}
+            </Badge>
+          </div>
+        </Button>
+
+        {expandedFolders["Favorites"] && (
+          <ScrollArea className="h-[200px] p-2">
+            <div className="space-y-2">
+              {favoritedLocations.length > 0 ? (
+                favoritedLocations.map((location) => (
+                  <div key={location.id} className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      className="flex-grow justify-start gap-2"
+                      onClick={() => onLocationSelect(location)}
+                    >
+                      <MapPin className="h-4 w-4" />
+                      <span className="truncate">{location.name}</span>
+                      {isLocationVisited(location.id) && (
+                        <Check className="h-4 w-4 ml-auto text-yellow-500" />
+                      )}
+                    </Button>
+                    {location.is_user_uploaded && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-100"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openDeleteDialog(location.id);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <div className="text-center text-muted-foreground py-4">
+                  No favorite gems yet
+                </div>
+              )}
+            </div>
+          </ScrollArea>
+        )}
+      </div>
+
       {/* Private Gems Folder */}
       <div className="border rounded-lg overflow-hidden">
         <Button
