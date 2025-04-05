@@ -168,6 +168,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const location = locations.find(loc => loc.id === locationId);
       if (!location) throw new Error('Location not found');
 
+      // For user-uploaded locations, just update the local state
+      if (location.is_user_uploaded) {
+        setVisitedLocations(prev => [...prev, locationId]);
+        toast.success('Checked in successfully! ✅');
+        return;
+      }
+
+      // For non-user-uploaded locations, save to the database
       const { error: visitError } = await supabase
         .from('location_visits')
         .insert({
@@ -289,7 +297,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         image_url: location.image_url || null,
         area: location.area || null,
         is_private: location.is_private !== undefined ? location.is_private : true,
-        is_user_uploaded: false
+        is_user_uploaded: true  // Set to true for user-added locations
       };
       
       // Update the locations state with the new location
