@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { MapPin, User, Home, LogOut, UserX, BarChart2 } from 'lucide-react';
+import { MapPin, User, Home, LogOut, UserX, BarChart2, Compass } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useApp } from '@/context/AppContext';
 import { Button } from './ui/button';
@@ -13,6 +13,7 @@ const NavBar = () => {
   
   const navItems = [
     { name: 'Map', path: '/', icon: Home },
+    { name: 'Explore', path: '/explore', icon: Compass },
     { name: 'Stats', path: '/stats', icon: BarChart2 },
     { name: 'Profile', path: '/profile', icon: User, requiresAuth: true },
   ];

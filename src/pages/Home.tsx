@@ -37,8 +37,8 @@ const Home = () => {
       >
         <ResizablePanel defaultSize={25} minSize={20} maxSize={40} className="bg-card rounded-lg">
           <div className="p-4 h-full overflow-auto space-y-4">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold">Location Details</h2>
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold text-center">Location Details</h2>
               <AddLocationButton onLocationAdded={handleLocationAdded} />
             </div>
             {loading ? (

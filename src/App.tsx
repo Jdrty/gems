@@ -10,6 +10,7 @@ import Home from "./pages/Home";
 import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
 import Stats from "./pages/Stats";
+import Explore from "./pages/Explore";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -31,6 +32,11 @@ const App = () => (
                   <Route path="/" element={
                     <ProtectedRoute>
                       <Home />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/explore" element={
+                    <ProtectedRoute allowGuest>
+                      <Explore />
                     </ProtectedRoute>
                   } />
                   <Route path="/stats" element={
