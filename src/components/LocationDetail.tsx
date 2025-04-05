@@ -8,24 +8,30 @@ import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import LocationFolders from './LocationFolders';
 
 interface LocationDetailProps {
   location: Location | null;
+  onLocationSelect?: (location: Location) => void;
 }
 
-const LocationDetail = ({ location }: LocationDetailProps) => {
+const LocationDetail = ({ location, onLocationSelect }: LocationDetailProps) => {
   const { markLocationVisited, isLocationVisited, isGuestMode } = useApp();
   const { user } = useAuth();
   const [checkingIn, setCheckingIn] = useState(false);
 
   if (!location) {
     return (
-      <div className="p-6 border rounded-lg bg-secondary/30 h-full flex flex-col items-center justify-center">
-        <MapPin className="w-10 h-10 text-muted-foreground mb-4" />
-        <h3 className="text-xl font-medium mb-2">Select a Location</h3>
-        <p className="text-center text-muted-foreground">
-          Select a location on the map to see details and check in
-        </p>
+      <div className="p-6 border rounded-lg bg-secondary/30 h-full flex flex-col">
+        <div className="mb-6 text-center">
+          <MapPin className="w-10 h-10 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-xl font-medium mb-2">Select a Location</h3>
+          <p className="text-center text-muted-foreground">
+            Select a location on the map or from the folders below
+          </p>
+        </div>
+        
+        {onLocationSelect && <LocationFolders onLocationSelect={onLocationSelect} />}
       </div>
     );
   }

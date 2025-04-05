@@ -25,9 +25,9 @@ const AddLocationButton = ({ onLocationAdded }: AddLocationButtonProps) => {
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
   const [difficulty, setDifficulty] = useState(3);
-  const { locations } = useApp();
+  const { addLocation } = useApp();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validate inputs
@@ -49,9 +49,22 @@ const AddLocationButton = ({ onLocationAdded }: AddLocationButtonProps) => {
       return;
     }
     
-    // In a real app, you would save this to your database
-    // For now, we'll just show a success message
-    toast.success('Location added successfully!');
+    // Create the new location
+    const newLocation = {
+      name: title,
+      description: description || null,
+      address: null,
+      latitude: lat,
+      longitude: lng,
+      category_id: null,
+      is_hidden_gem: true, // All locations are hidden gems
+      difficulty_to_find: difficulty,
+      image_url: null,
+      area: null
+    };
+    
+    // Add the location to the app context
+    await addLocation(newLocation);
     
     // Call the onLocationAdded callback with the new coordinates
     if (onLocationAdded) {

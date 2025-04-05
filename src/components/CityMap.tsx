@@ -269,27 +269,31 @@ const CityMap = forwardRef<MapRef, MapProps>(({ onLocationSelect }, ref) => {
 
   // Update locations when they change or map is initialized
   useEffect(() => {
-    if (!map.current || !mapInitialized || !locations.length) return;
+    if (!map.current || !mapInitialized) return;
 
     try {
       const source = map.current.getSource('locations') as mapboxgl.GeoJSONSource;
       if (source) {
+        // Create a unique ID for each feature to ensure proper click handling
+        const features = locations.map(location => ({
+          type: 'Feature' as const,
+          id: location.id, // Use the location ID as the feature ID
+          geometry: {
+            type: 'Point' as const,
+            coordinates: [location.longitude, location.latitude]
+          },
+          properties: {
+            id: location.id,
+            name: location.name,
+            description: location.description,
+            is_hidden_gem: location.is_hidden_gem,
+            is_visited: isLocationVisited(location.id)
+          }
+        }));
+
         source.setData({
           type: 'FeatureCollection',
-          features: locations.map(location => ({
-            type: 'Feature',
-            geometry: {
-              type: 'Point',
-              coordinates: [location.longitude, location.latitude]
-            },
-            properties: {
-              id: location.id,
-              name: location.name,
-              description: location.description,
-              is_hidden_gem: location.is_hidden_gem,
-              is_visited: isLocationVisited(location.id)
-            }
-          }))
+          features
         });
       }
     } catch (error) {

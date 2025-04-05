@@ -26,6 +26,7 @@ interface AppContextType {
   visitedLocations: string[];
   isGuestMode: boolean;
   setGuestMode: (value: boolean) => void;
+  addLocation: (location: Omit<Location, 'id' | 'city_id'>) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -221,6 +222,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return visitedLocations.includes(locationId);
   };
 
+  const addLocation = async (locationData: Omit<Location, 'id' | 'city_id'>) => {
+    try {
+      // In a real app, you would save this to your database
+      // For now, we'll just add it to the local state
+      const newLocation: Location = {
+        ...locationData,
+        id: `temp-${Date.now()}`, // Generate a temporary ID
+        city_id: 'toronto', // Default city ID
+      };
+      
+      setLocations(prev => [...prev, newLocation]);
+      toast.success('Location added successfully!');
+    } catch (error) {
+      console.error('Failed to add location:', error);
+      toast.error('Failed to add location');
+    }
+  };
+
   return (
     <AppContext.Provider value={{
       locations,
@@ -229,7 +248,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       isLocationVisited,
       visitedLocations,
       isGuestMode,
-      setGuestMode
+      setGuestMode,
+      addLocation
     }}>
       {children}
     </AppContext.Provider>

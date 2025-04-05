@@ -22,6 +22,13 @@ const Home = () => {
     }
   };
 
+  const handleLocationSelect = (location: Location | null) => {
+    setSelectedLocation(location);
+    if (location && mapRef.current) {
+      mapRef.current.centerOnCoordinates([location.longitude, location.latitude]);
+    }
+  };
+
   return (
     <div className="h-[calc(100vh-4rem)] p-4 md:p-6">
       <ResizablePanelGroup
@@ -37,7 +44,14 @@ const Home = () => {
             {loading ? (
               <Skeleton className="h-[400px] rounded-lg" />
             ) : (
-              <LocationDetail location={selectedLocation} />
+              <ResizablePanel defaultSize={30} minSize={25} maxSize={40}>
+                <div className="h-full p-4">
+                  <LocationDetail 
+                    location={selectedLocation} 
+                    onLocationSelect={handleLocationSelect}
+                  />
+                </div>
+              </ResizablePanel>
             )}
           </div>
         </ResizablePanel>
@@ -49,7 +63,7 @@ const Home = () => {
             {loading ? (
               <Skeleton className="h-full w-full rounded-lg" />
             ) : (
-              <CityMap ref={mapRef} onLocationSelect={setSelectedLocation} />
+              <CityMap ref={mapRef} onLocationSelect={handleLocationSelect} />
             )}
           </div>
         </ResizablePanel>
