@@ -151,20 +151,33 @@ const Explore = () => {
           </div>
           
           <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="flex items-center gap-2"
-              onClick={() => setShowFilters(true)}
-            >
-              <Filter className="h-4 w-4" />
-              Filters
+            <div className="flex items-center gap-1">
               {(selectedDifficulties.length > 0 || selectedCategories.length > 0) && (
-                <Badge variant="secondary" className="ml-1">
-                  {selectedDifficulties.length + selectedCategories.length}
-                </Badge>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="h-8"
+                  onClick={clearFilters}
+                >
+                  Clear
+                </Button>
               )}
-            </Button>
+              
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex items-center gap-2"
+                onClick={() => setShowFilters(true)}
+              >
+                <Filter className="h-4 w-4" />
+                Filters
+                {(selectedDifficulties.length > 0 || selectedCategories.length > 0) && (
+                  <Badge variant="secondary" className="ml-1">
+                    {selectedDifficulties.length + selectedCategories.length}
+                  </Badge>
+                )}
+              </Button>
+            </div>
             
             <Select
               value={sortBy}
@@ -251,14 +264,7 @@ const Explore = () => {
               </div>
             </div>
             
-            <DialogFooter className="flex justify-between pt-4 border-t">
-              <Button 
-                variant="ghost" 
-                onClick={clearFilters}
-                disabled={selectedDifficulties.length === 0 && selectedCategories.length === 0}
-              >
-                Clear Filters
-              </Button>
+            <DialogFooter className="flex justify-end pt-4 border-t">
               <Button onClick={() => setShowFilters(false)}>
                 Apply Filters
               </Button>
