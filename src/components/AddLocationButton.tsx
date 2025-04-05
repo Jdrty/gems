@@ -14,7 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Plus } from 'lucide-react';
+import { Plus, MapPin } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -53,6 +53,35 @@ const AddLocationButton = ({ onLocationAdded }: AddLocationButtonProps) => {
   const [difficulty, setDifficulty] = useState('1');
   const [isPrivate, setIsPrivate] = useState(true);
   const [category, setCategory] = useState('');
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+
+  const getCurrentLocation = () => {
+    setIsLoadingLocation(true);
+    
+    if (!navigator.geolocation) {
+      toast.error('Geolocation is not supported by your browser');
+      setIsLoadingLocation(false);
+      return;
+    }
+    
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        
+        setLatitude(lat.toString());
+        setLongitude(lng.toString());
+        
+        toast.success('Current location retrieved successfully');
+        setIsLoadingLocation(false);
+      },
+      (error) => {
+        console.error('Error getting location:', error);
+        toast.error('Failed to get your current location');
+        setIsLoadingLocation(false);
+      }
+    );
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -162,24 +191,40 @@ const AddLocationButton = ({ onLocationAdded }: AddLocationButtonProps) => {
                 placeholder="Enter location description"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="latitude">Latitude</Label>
-                <Input
-                  id="latitude"
-                  value={latitude}
-                  onChange={(e) => setLatitude(e.target.value)}
-                  placeholder="Enter latitude"
-                />
+            <div className="grid gap-2">
+              <div className="flex justify-between items-center">
+                <Label htmlFor="coordinates">Coordinates</Label>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex items-center gap-1"
+                  onClick={getCurrentLocation}
+                  disabled={isLoadingLocation}
+                >
+                  <MapPin className="h-4 w-4" />
+                  {isLoadingLocation ? 'Getting location...' : 'Use current location'}
+                </Button>
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="longitude">Longitude</Label>
-                <Input
-                  id="longitude"
-                  value={longitude}
-                  onChange={(e) => setLongitude(e.target.value)}
-                  placeholder="Enter longitude"
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="latitude">Latitude</Label>
+                  <Input
+                    id="latitude"
+                    value={latitude}
+                    onChange={(e) => setLatitude(e.target.value)}
+                    placeholder="Enter latitude"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="longitude">Longitude</Label>
+                  <Input
+                    id="longitude"
+                    value={longitude}
+                    onChange={(e) => setLongitude(e.target.value)}
+                    placeholder="Enter longitude"
+                  />
+                </div>
               </div>
             </div>
             <div className="grid gap-2">
