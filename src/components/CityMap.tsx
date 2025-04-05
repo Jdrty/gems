@@ -72,6 +72,66 @@ const CityMap = ({ onLocationSelect }: MapProps) => {
           }
         });
 
+        // Add locations source and layer
+        newMap.addSource('locations', {
+          type: 'geojson',
+          data: {
+            type: 'FeatureCollection',
+            features: []
+          }
+        });
+
+        newMap.addLayer({
+          id: 'locations',
+          type: 'circle',
+          source: 'locations',
+          paint: {
+            'circle-radius': 6,
+            'circle-color': [
+              'case',
+              ['get', 'is_hidden_gem'],
+              '#fbbf24', // yellow-400
+              [
+                'case',
+                ['get', 'is_visited'],
+                '#4ade80', // green-400
+                '#22c55e' // primary
+              ]
+            ],
+            'circle-stroke-width': 2,
+            'circle-stroke-color': [
+              'case',
+              ['get', 'is_hidden_gem'],
+              'rgba(250, 204, 21, 0.7)', // yellow-400 with opacity
+              [
+                'case',
+                ['get', 'is_visited'],
+                'rgba(74, 222, 128, 0.7)', // green-400 with opacity
+                'rgba(59, 130, 246, 0.7)' // primary with opacity
+              ]
+            ]
+          }
+        });
+
+        // Add click handler for locations
+        newMap.on('click', 'locations', (e) => {
+          if (e.features && e.features[0] && onLocationSelect) {
+            const feature = e.features[0];
+            const location = locations.find(loc => loc.id === feature.properties.id);
+            if (location) {
+              onLocationSelect(location);
+            }
+          }
+        });
+
+        // Change cursor on hover
+        newMap.on('mouseenter', 'locations', () => {
+          newMap.getCanvas().style.cursor = 'pointer';
+        });
+        newMap.on('mouseleave', 'locations', () => {
+          newMap.getCanvas().style.cursor = '';
+        });
+
         setMapInitialized(true);
         map.current = newMap;
       });
@@ -104,57 +164,36 @@ const CityMap = ({ onLocationSelect }: MapProps) => {
     }
   }, [mapboxToken]);
 
-  // Add markers when locations change or map is initialized
+  // Update locations when they change or map is initialized
   useEffect(() => {
     if (!map.current || !mapInitialized || !locations.length) return;
 
     try {
-      // Clear existing markers if any
-      const markers = document.getElementsByClassName('mapboxgl-marker');
-      while (markers.length > 0) {
-        markers[0].remove();
-      }
-
-      // Add new markers
-      locations.forEach(location => {
-        const markerElement = document.createElement('div');
-        markerElement.className = 'flex items-center justify-center';
-        
-        const markerInner = document.createElement('div');
-        const statusClass = location.is_hidden_gem 
-          ? 'bg-yellow-400 shadow-[0px_0px_4px_2px_rgba(250,204,21,0.7)]' 
-          : isLocationVisited(location.id)
-            ? 'bg-green-400 shadow-[0px_0px_4px_2px_rgba(74,222,128,0.7)]'
-            : 'bg-primary shadow-[0px_0px_4px_2px_rgba(59,130,246,0.7)]';
-            
-        markerInner.className = `w-3 h-3 rounded-full ${statusClass} flex items-center justify-center transition-all duration-300`;
-        
-        markerElement.appendChild(markerInner);
-        
-        const marker = new mapboxgl.Marker(markerElement)
-          .setLngLat([location.longitude, location.latitude])
-          .setPopup(
-            new mapboxgl.Popup({ offset: 25 })
-              .setHTML(
-                `<div class="bg-zinc-900/95 p-2 rounded-lg border border-zinc-800">
-                  <h3 class="font-bold text-sm text-zinc-100">${location.name}</h3>
-                  <p class="text-xs text-zinc-400">${location.description || ''}</p>
-                </div>`
-              )
-          )
-          .addTo(map.current);
-          
-        markerElement.addEventListener('click', () => {
-          if (onLocationSelect) {
-            onLocationSelect(location);
-          }
+      const source = map.current.getSource('locations') as mapboxgl.GeoJSONSource;
+      if (source) {
+        source.setData({
+          type: 'FeatureCollection',
+          features: locations.map(location => ({
+            type: 'Feature',
+            geometry: {
+              type: 'Point',
+              coordinates: [location.longitude, location.latitude]
+            },
+            properties: {
+              id: location.id,
+              name: location.name,
+              description: location.description,
+              is_hidden_gem: location.is_hidden_gem,
+              is_visited: isLocationVisited(location.id)
+            }
+          }))
         });
-      });
+      }
     } catch (error) {
-      console.error('Error adding markers:', error);
-      toast.error('Failed to add location markers');
+      console.error('Error updating locations:', error);
+      toast.error('Failed to update location markers');
     }
-  }, [locations, mapInitialized, isLocationVisited, onLocationSelect]);
+  }, [locations, mapInitialized, isLocationVisited]);
 
   if (!mapboxToken) {
     return (
