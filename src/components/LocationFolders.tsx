@@ -8,6 +8,7 @@ import {
   Check,
   ChevronDown,
   ChevronRight,
+  ChevronLeft,
   MapPin,
   FolderPlus,
   Folder,

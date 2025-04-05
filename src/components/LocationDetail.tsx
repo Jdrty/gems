@@ -3,7 +3,7 @@ import { Location } from '@/types/location';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Check, MapPin, UserX, Star, MapPinned, Clock, Tag } from 'lucide-react';
+import { Check, MapPin, UserX, Star, MapPinned, Clock, Tag, ChevronLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -31,7 +31,12 @@ const LocationDetail = ({ location, onLocationSelect }: LocationDetailProps) => 
           </p>
         </div>
         
-        {onLocationSelect && <LocationFolders onLocationSelect={onLocationSelect} />}
+        {onLocationSelect && (
+          <LocationFolders 
+            onLocationSelect={onLocationSelect} 
+            onBack={() => onLocationSelect(null)} 
+          />
+        )}
       </div>
     );
   }
@@ -55,6 +60,14 @@ const LocationDetail = ({ location, onLocationSelect }: LocationDetailProps) => 
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 -ml-2"
+                onClick={() => onLocationSelect?.(null)}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
               <CardTitle className="text-xl">{location.name}</CardTitle>
               {location.is_hidden_gem && !visited && (
                 <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">
