@@ -14,10 +14,12 @@ export interface Location {
   area: string | null;
   created_at?: string;
   updated_at?: string;
+  is_private: boolean;
+  is_user_uploaded: boolean;
 }
 
 // Extended location type for our application
 export interface AppLocation extends Location {
   is_private: boolean;
   is_user_uploaded: boolean;
-} 
+}

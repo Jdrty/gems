@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import { useApp } from '@/context/AppContext';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { toast } from 'sonner';
+import { useState } from "react";
+import { useApp } from "@/context/AppContext";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -13,8 +13,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Plus, MapPin } from 'lucide-react';
+} from "@/components/ui/dialog";
+import { Plus, MapPin } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -22,18 +22,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Location } from '@/types/location';
+import { Location } from "@/types/location";
 
 // Define categories for location types
 const CATEGORIES = [
-  { id: '1', name: 'Parks' },
-  { id: '2', name: 'Cafe' },
-  { id: '3', name: 'Museums' },
-  { id: '4', name: 'Landmarks' },
-  { id: '5', name: 'Shopping' },
-  { id: '6', name: 'Nature' },
-  { id: '7', name: 'Viewpoint' },
-  { id: '8', name: 'Other' }
+  { id: "1", name: "Parks" },
+  { id: "2", name: "Cafe" },
+  { id: "3", name: "Museums" },
+  { id: "4", name: "Landmarks" },
+  { id: "5", name: "Shopping" },
+  { id: "6", name: "Nature" },
+  { id: "7", name: "Viewpoint" },
+  { id: "8", name: "Other" },
 ] as const;
 
 interface AddLocationButtonProps {
@@ -42,38 +42,38 @@ interface AddLocationButtonProps {
 
 const AddLocationButton = ({ onLocationAdded }: AddLocationButtonProps) => {
   const { addLocation, isAddLocationOpen, setAddLocationOpen } = useApp();
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [latitude, setLatitude] = useState('');
-  const [longitude, setLongitude] = useState('');
-  const [difficulty, setDifficulty] = useState('1');
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [latitude, setLatitude] = useState("");
+  const [longitude, setLongitude] = useState("");
+  const [difficulty, setDifficulty] = useState("1");
   const [isPrivate, setIsPrivate] = useState(true);
-  const [category, setCategory] = useState('');
+  const [category, setCategory] = useState("");
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
 
   const getCurrentLocation = () => {
     setIsLoadingLocation(true);
-    
+
     if (!navigator.geolocation) {
-      toast.error('Geolocation is not supported by your browser');
+      toast.error("Geolocation is not supported by your browser");
       setIsLoadingLocation(false);
       return;
     }
-    
+
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
-        
+
         setLatitude(lat.toString());
         setLongitude(lng.toString());
-        
-        toast.success('Current location retrieved successfully');
+
+        toast.success("Current location retrieved successfully");
         setIsLoadingLocation(false);
       },
       (error) => {
-        console.error('Error getting location:', error);
-        toast.error('Failed to get your current location');
+        console.error("Error getting location:", error);
+        toast.error("Failed to get your current location");
         setIsLoadingLocation(false);
       }
     );
@@ -81,35 +81,35 @@ const AddLocationButton = ({ onLocationAdded }: AddLocationButtonProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!title.trim()) {
-      toast.error('Please enter a title');
+      toast.error("Please enter a title");
       return;
     }
-    
+
     if (!latitude.trim() || !longitude.trim()) {
-      toast.error('Please enter valid coordinates');
+      toast.error("Please enter valid coordinates");
       return;
     }
-    
+
     const lat = parseFloat(latitude);
     const lng = parseFloat(longitude);
-    
+
     if (isNaN(lat) || isNaN(lng)) {
-      toast.error('Please enter valid numbers for coordinates');
+      toast.error("Please enter valid numbers for coordinates");
       return;
     }
-    
+
     if (lat < -90 || lat > 90) {
-      toast.error('Latitude must be between -90 and 90');
+      toast.error("Latitude must be between -90 and 90");
       return;
     }
-    
+
     if (lng < -180 || lng > 180) {
-      toast.error('Longitude must be between -180 and 180');
+      toast.error("Longitude must be between -180 and 180");
       return;
     }
-    
+
     try {
       const newLocation = {
         name: title,
@@ -121,37 +121,41 @@ const AddLocationButton = ({ onLocationAdded }: AddLocationButtonProps) => {
         is_hidden_gem: true,
         difficulty_to_find: parseInt(difficulty),
         image_url: null,
-        area: null
+        area: null,
+        is_private: isPrivate,
+        is_user_uploaded: true,
       };
-      
+
       await addLocation(newLocation);
-      
+
       // Reset form
-      setTitle('');
-      setDescription('');
-      setLatitude('');
-      setLongitude('');
-      setDifficulty('1');
+      setTitle("");
+      setDescription("");
+      setLatitude("");
+      setLongitude("");
+      setDifficulty("1");
       setIsPrivate(true);
-      setCategory('');
-      
+      setCategory("");
+
       // Close dialog
       setAddLocationOpen(false);
-      
+
       // Notify parent component about the new location's coordinates
       if (onLocationAdded) {
         onLocationAdded([lng, lat]);
       }
+
+      toast.success("Location added successfully");
     } catch (error) {
-      console.error('Error adding location:', error);
-      toast.error('Failed to add location');
+      console.error("Error adding location:", error);
+      toast.error("Failed to add location");
     }
   };
 
   return (
     <Dialog open={isAddLocationOpen} onOpenChange={setAddLocationOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" className="gap-2">
+        <Button size="sm" className="flex items-center gap-2 w-full">
           <Plus className="w-4 h-4" />
           Add Location
         </Button>
@@ -186,16 +190,18 @@ const AddLocationButton = ({ onLocationAdded }: AddLocationButtonProps) => {
             <div className="grid gap-2">
               <div className="flex justify-between items-center">
                 <Label htmlFor="coordinates">Coordinates</Label>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
                   className="flex items-center gap-1"
                   onClick={getCurrentLocation}
                   disabled={isLoadingLocation}
                 >
                   <MapPin className="h-4 w-4" />
-                  {isLoadingLocation ? 'Getting location...' : 'Use current location'}
+                  {isLoadingLocation
+                    ? "Getting location..."
+                    : "Use current location"}
                 </Button>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -273,11 +279,11 @@ const AddLocationButton = ({ onLocationAdded }: AddLocationButtonProps) => {
               </RadioGroup>
             </div>
             <p className="text-xs text-muted-foreground">
-              {difficulty === '1' && 'Very easy to find'}
-              {difficulty === '2' && 'Easy to find'}
-              {difficulty === '3' && 'Moderate difficulty'}
-              {difficulty === '4' && 'Hard to find'}
-              {difficulty === '5' && 'Very hard to find'}
+              {difficulty === "1" && "Very easy to find"}
+              {difficulty === "2" && "Easy to find"}
+              {difficulty === "3" && "Moderate difficulty"}
+              {difficulty === "4" && "Hard to find"}
+              {difficulty === "5" && "Very hard to find"}
             </p>
           </div>
           <DialogFooter>
@@ -289,4 +295,4 @@ const AddLocationButton = ({ onLocationAdded }: AddLocationButtonProps) => {
   );
 };
 
-export default AddLocationButton; 
+export default AddLocationButton;
