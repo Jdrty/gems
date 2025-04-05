@@ -33,8 +33,7 @@ const LocationDetail = ({ location, onLocationSelect }: LocationDetailProps) => 
         
         {onLocationSelect && (
           <LocationFolders 
-            onLocationSelect={onLocationSelect} 
-            onBack={() => onLocationSelect(null)} 
+            onLocationSelect={onLocationSelect}
           />
         )}
       </div>
@@ -63,7 +62,7 @@ const LocationDetail = ({ location, onLocationSelect }: LocationDetailProps) => 
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 -ml-2"
+                className="h-8 w-8 -ml-2 bg-green-500 hover:bg-green-600 text-white"
                 onClick={() => onLocationSelect?.(null)}
               >
                 <ChevronLeft className="h-4 w-4" />
