@@ -90,25 +90,15 @@ const CityMap = ({ onLocationSelect }: MapProps) => {
             'circle-color': [
               'case',
               ['get', 'is_hidden_gem'],
-              '#fbbf24', // yellow-400
-              [
-                'case',
-                ['get', 'is_visited'],
-                '#4ade80', // green-400
-                '#22c55e' // primary
-              ]
+              '#4ade80', // green-400 for hidden gems
+              '#fbbf24' // yellow-400 for completed gems
             ],
             'circle-stroke-width': 2,
             'circle-stroke-color': [
               'case',
               ['get', 'is_hidden_gem'],
-              'rgba(250, 204, 21, 0.7)', // yellow-400 with opacity
-              [
-                'case',
-                ['get', 'is_visited'],
-                'rgba(74, 222, 128, 0.7)', // green-400 with opacity
-                'rgba(59, 130, 246, 0.7)' // primary with opacity
-              ]
+              'rgba(74, 222, 128, 0.7)', // green-400 with opacity for hidden gems
+              'rgba(250, 204, 21, 0.7)' // yellow-400 with opacity for completed gems
             ]
           }
         });
@@ -212,15 +202,11 @@ const CityMap = ({ onLocationSelect }: MapProps) => {
       <div ref={mapContainer} className="w-full h-full" />
       <div className="bg-zinc-900/90 absolute bottom-8 left-4 flex flex-col gap-2 p-3 rounded-lg border border-zinc-800">
         <div className="flex items-center gap-2">
-          <div className="h-3 w-3 rounded-full bg-primary shadow-[0px_0px_4px_2px_rgba(59,130,246,0.7)]" />
-          <div className="text-sm text-zinc-300">Available</div>
+          <div className="h-3 w-3 rounded-full bg-yellow-400 shadow-[0px_0px_4px_2px_rgba(250,204,21,0.7)]" />
+          <div className="text-sm text-zinc-300">Completed Gem</div>
         </div>
         <div className="flex items-center gap-2">
           <div className="h-3 w-3 rounded-full bg-green-400 shadow-[0px_0px_4px_2px_rgba(74,222,128,0.7)]" />
-          <div className="text-sm text-zinc-300">Visited</div>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="h-3 w-3 rounded-full bg-yellow-400 shadow-[0px_0px_4px_2px_rgba(250,204,21,0.7)]" />
           <div className="text-sm text-zinc-300">Hidden Gem</div>
         </div>
       </div>
