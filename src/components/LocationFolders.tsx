@@ -130,7 +130,7 @@ const LocationFolders = ({ onLocationSelect }: LocationFoldersProps) => {
               {/* Add Folder Button */}
               <Dialog open={showAddFolderDialog} onOpenChange={setShowAddFolderDialog}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" size="sm" className="w-full justify-start gap-2 bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500/20 hover:text-amber-600">
+                  <Button variant="outline" size="sm" className="w-full justify-start gap-2 bg-green-500/10 text-green-500 border-green-500/20 hover:bg-green-500/20 hover:text-green-600">
                     <FolderPlus className="h-4 w-4" />
                     Add Folder
                   </Button>
@@ -154,7 +154,7 @@ const LocationFolders = ({ onLocationSelect }: LocationFoldersProps) => {
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button onClick={handleAddFolder} className="bg-amber-500 hover:bg-amber-600 text-white">Create Folder</Button>
+                    <Button onClick={handleAddFolder} className="bg-green-500 hover:bg-green-600 text-white">Create Folder</Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
@@ -174,7 +174,7 @@ const LocationFolders = ({ onLocationSelect }: LocationFoldersProps) => {
                       ) : (
                         <ChevronRight className="h-3 w-3" />
                       )}
-                      <Folder className="h-3.5 w-3.5 text-amber-500" />
+                      <Folder className="h-3.5 w-3.5 text-green-500" />
                       <span className="text-sm">{folder.name}</span>
                       <Badge variant="outline" className="ml-2 text-xs">
                         {getLocationsInFolder(folder.id).length}
@@ -252,7 +252,7 @@ const LocationFolders = ({ onLocationSelect }: LocationFoldersProps) => {
                               }
                             }}
                           >
-                            <Folder className={`h-3 w-3 ${folder.locations.includes(location.id) ? 'text-amber-500' : 'text-muted-foreground'}`} />
+                            <Folder className={`h-3 w-3 ${folder.locations.includes(location.id) ? 'text-green-500' : 'text-muted-foreground'}`} />
                           </Button>
                         ))}
                       </div>
