@@ -33,16 +33,16 @@ const NavBar = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-md border-b h-16">
-      <div className="ml-10 container flex h-full items-center justify-between">
+      <div className="flex h-full items-center justify-between px-4">
         <div className="flex items-center gap-2">
           <MapPin className="h-6 w-6 text-primary" />
-          <span className="font-bold text-xl">CityTrove</span>
+          <span className="font-bold text-xl">Gems</span>
         </div>
         
         <div className="flex items-center gap-4">
           {user || isGuestMode ? (
             <>
-              <nav className="flex items-center space-x-6 mx-6">
+              <nav className="flex items-center space-x-6">
                 {filteredNavItems.map((item) => (
                   <Link
                     key={item.name}

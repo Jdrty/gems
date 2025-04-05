@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus, MapPin, Star } from 'lucide-react';
 import { 
@@ -18,31 +18,55 @@ interface AddLocationButtonProps {
   onLocationAdded?: (coordinates: [number, number]) => void;
 }
 
+// Define the form state type
+interface FormState {
+  open: boolean;
+  title: string;
+  description: string;
+  latitude: string;
+  longitude: string;
+  difficulty: number;
+}
+
+const STORAGE_KEY = 'addLocationFormState';
+
 const AddLocationButton = ({ onLocationAdded }: AddLocationButtonProps) => {
-  const [open, setOpen] = useState(false);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [latitude, setLatitude] = useState('');
-  const [longitude, setLongitude] = useState('');
-  const [difficulty, setDifficulty] = useState(3);
+  // Initialize state from localStorage or default values
+  const [formState, setFormState] = useState<FormState>(() => {
+    const savedState = localStorage.getItem(STORAGE_KEY);
+    return savedState ? JSON.parse(savedState) : {
+      open: false,
+      title: '',
+      description: '',
+      latitude: '',
+      longitude: '',
+      difficulty: 3
+    };
+  });
+
   const { addLocation } = useApp();
+
+  // Save form state to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(formState));
+  }, [formState]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validate inputs
-    if (!title.trim()) {
+    if (!formState.title.trim()) {
       toast.error('Please enter a title');
       return;
     }
     
-    if (!latitude.trim() || !longitude.trim()) {
+    if (!formState.latitude.trim() || !formState.longitude.trim()) {
       toast.error('Please enter valid coordinates');
       return;
     }
     
-    const lat = parseFloat(latitude);
-    const lng = parseFloat(longitude);
+    const lat = parseFloat(formState.latitude);
+    const lng = parseFloat(formState.longitude);
     
     if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
       toast.error('Please enter valid coordinates');
@@ -51,14 +75,14 @@ const AddLocationButton = ({ onLocationAdded }: AddLocationButtonProps) => {
     
     // Create the new location
     const newLocation = {
-      name: title,
-      description: description || null,
+      name: formState.title,
+      description: formState.description || null,
       address: null,
       latitude: lat,
       longitude: lng,
       category_id: null,
       is_hidden_gem: true, // All locations are hidden gems
-      difficulty_to_find: difficulty,
+      difficulty_to_find: formState.difficulty,
       image_url: null,
       area: null
     };
@@ -71,17 +95,23 @@ const AddLocationButton = ({ onLocationAdded }: AddLocationButtonProps) => {
       onLocationAdded([lng, lat]);
     }
     
-    // Reset form and close dialog
-    setTitle('');
-    setDescription('');
-    setLatitude('');
-    setLongitude('');
-    setDifficulty(3);
-    setOpen(false);
+    // Clear form state and localStorage
+    setFormState({
+      open: false,
+      title: '',
+      description: '',
+      latitude: '',
+      longitude: '',
+      difficulty: 3
+    });
+    localStorage.removeItem(STORAGE_KEY);
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog 
+      open={formState.open} 
+      onOpenChange={(open) => setFormState(prev => ({ ...prev, open }))}
+    >
       <DialogTrigger asChild>
         <Button className="w-full flex items-center gap-2">
           <Plus className="h-4 w-4" />
@@ -97,8 +127,8 @@ const AddLocationButton = ({ onLocationAdded }: AddLocationButtonProps) => {
             <Label htmlFor="title">Title</Label>
             <Input
               id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              value={formState.title}
+              onChange={(e) => setFormState(prev => ({ ...prev, title: e.target.value }))}
               placeholder="Enter location name"
             />
           </div>
@@ -107,8 +137,8 @@ const AddLocationButton = ({ onLocationAdded }: AddLocationButtonProps) => {
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              value={formState.description}
+              onChange={(e) => setFormState(prev => ({ ...prev, description: e.target.value }))}
               placeholder="Describe this location"
               rows={3}
             />
@@ -119,8 +149,8 @@ const AddLocationButton = ({ onLocationAdded }: AddLocationButtonProps) => {
               <Label htmlFor="latitude">Latitude</Label>
               <Input
                 id="latitude"
-                value={latitude}
-                onChange={(e) => setLatitude(e.target.value)}
+                value={formState.latitude}
+                onChange={(e) => setFormState(prev => ({ ...prev, latitude: e.target.value }))}
                 placeholder="e.g. 43.6532"
                 type="number"
                 step="any"
@@ -131,8 +161,8 @@ const AddLocationButton = ({ onLocationAdded }: AddLocationButtonProps) => {
               <Label htmlFor="longitude">Longitude</Label>
               <Input
                 id="longitude"
-                value={longitude}
-                onChange={(e) => setLongitude(e.target.value)}
+                value={formState.longitude}
+                onChange={(e) => setFormState(prev => ({ ...prev, longitude: e.target.value }))}
                 placeholder="e.g. -79.3832"
                 type="number"
                 step="any"
@@ -147,9 +177,9 @@ const AddLocationButton = ({ onLocationAdded }: AddLocationButtonProps) => {
                 <button
                   key={value}
                   type="button"
-                  onClick={() => setDifficulty(value)}
+                  onClick={() => setFormState(prev => ({ ...prev, difficulty: value }))}
                   className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    value <= difficulty 
+                    value <= formState.difficulty 
                       ? 'bg-yellow-500 text-black' 
                       : 'bg-gray-200 text-gray-500'
                   }`}
@@ -159,16 +189,23 @@ const AddLocationButton = ({ onLocationAdded }: AddLocationButtonProps) => {
               ))}
             </div>
             <p className="text-xs text-muted-foreground">
-              {difficulty === 1 && 'Very easy to find'}
-              {difficulty === 2 && 'Easy to find'}
-              {difficulty === 3 && 'Moderate difficulty'}
-              {difficulty === 4 && 'Hard to find'}
-              {difficulty === 5 && 'Very hard to find'}
+              {formState.difficulty === 1 && 'Very easy to find'}
+              {formState.difficulty === 2 && 'Easy to find'}
+              {formState.difficulty === 3 && 'Moderate difficulty'}
+              {formState.difficulty === 4 && 'Hard to find'}
+              {formState.difficulty === 5 && 'Very hard to find'}
             </p>
           </div>
           
           <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => {
+                setFormState(prev => ({ ...prev, open: false }));
+                localStorage.removeItem(STORAGE_KEY);
+              }}
+            >
               Cancel
             </Button>
             <Button type="submit">

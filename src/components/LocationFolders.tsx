@@ -53,7 +53,7 @@ const LocationFolders = ({ onLocationSelect }: LocationFoldersProps) => {
                   key={location.id}
                   variant="ghost"
                   size="sm"
-                  className="w-full justify-start text-sm"
+                  className="w-full justify-start text-sm hover:bg-green-500/30"
                   onClick={() => onLocationSelect(location)}
                 >
                   <MapPin className="h-3.5 w-3.5 mr-2 text-muted-foreground" />

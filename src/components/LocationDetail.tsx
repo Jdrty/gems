@@ -69,7 +69,7 @@ const LocationDetail = ({ location, onLocationSelect }: LocationDetailProps) => 
             </CardDescription>
           </div>
           {visited && (
-            <Badge className="bg-yellow-500/20 text-yellow-500 border-yellow-500/20">
+            <Badge className="bg-yellow-500/20 text-yellow-500 border-yellow-500/20 hover:bg-yellow-500/30">
               <Check className="w-3.5 h-3.5 mr-1" />
               Visited
             </Badge>
