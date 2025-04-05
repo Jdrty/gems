@@ -40,7 +40,7 @@ const LocationFolders = ({ onLocationSelect }: LocationFoldersProps) => {
   const [expandedFolders, setExpandedFolders] = useState<
     Record<string, boolean>
   >({
-    "Private Gems": true,
+    "Private Gems": false,
     "Public Gems": false,
   });
   const [customFolders, setCustomFolders] = useState<CustomFolder[]>([]);
