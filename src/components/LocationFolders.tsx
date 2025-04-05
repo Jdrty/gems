@@ -130,12 +130,12 @@ const LocationFolders = ({ onLocationSelect }: LocationFoldersProps) => {
               {/* Add Folder Button */}
               <Dialog open={showAddFolderDialog} onOpenChange={setShowAddFolderDialog}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" size="sm" className="w-full justify-start gap-2">
+                  <Button variant="outline" size="sm" className="w-full justify-start gap-2 bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500/20 hover:text-amber-600">
                     <FolderPlus className="h-4 w-4" />
                     Add Folder
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
+                <DialogContent className="sm:max-w-[425px] fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                   <DialogHeader>
                     <DialogTitle>Create New Folder</DialogTitle>
                     <DialogDescription>
@@ -154,7 +154,7 @@ const LocationFolders = ({ onLocationSelect }: LocationFoldersProps) => {
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button onClick={handleAddFolder}>Create Folder</Button>
+                    <Button onClick={handleAddFolder} className="bg-amber-500 hover:bg-amber-600 text-white">Create Folder</Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
