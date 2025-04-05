@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,6 +9,7 @@ import NavBar from "./components/NavBar";
 import Home from "./pages/Home";
 import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
+import Stats from "./pages/Stats";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -31,6 +31,11 @@ const App = () => (
                   <Route path="/" element={
                     <ProtectedRoute>
                       <Home />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/stats" element={
+                    <ProtectedRoute allowGuest>
+                      <Stats />
                     </ProtectedRoute>
                   } />
                   <Route path="/profile" element={

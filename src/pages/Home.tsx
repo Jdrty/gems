@@ -1,8 +1,7 @@
-
 import { useState } from 'react';
 import CityMap from '@/components/CityMap';
 import LocationDetail from '@/components/LocationDetail';
-import { Location } from '@/lib/mockData';
+import { Location } from '@/types/location';
 import { useApp } from '@/context/AppContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -16,14 +15,14 @@ const Home = () => {
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
 
   return (
-    <div className="h-[calc(100vh-4rem)]">
+    <div className="h-[calc(100vh-4rem)] p-4 md:p-6">
       <ResizablePanelGroup
         direction="horizontal"
-        className="w-full h-full"
+        className="w-full h-full gap-4"
       >
-        <ResizablePanel defaultSize={25} minSize={20} maxSize={40} className="bg-card">
-          <div className="p-4 h-full overflow-auto">
-            <h2 className="text-xl font-semibold mb-4">Location Details</h2>
+        <ResizablePanel defaultSize={25} minSize={20} maxSize={40} className="bg-card rounded-lg">
+          <div className="p-4 h-full overflow-auto space-y-4">
+            <h2 className="text-xl font-semibold">Location Details</h2>
             {loading ? (
               <Skeleton className="h-[400px] rounded-lg" />
             ) : (
@@ -32,10 +31,10 @@ const Home = () => {
           </div>
         </ResizablePanel>
         
-        <ResizableHandle withHandle />
+        <ResizableHandle withHandle className="bg-border" />
         
         <ResizablePanel defaultSize={75}>
-          <div className="h-full p-4">
+          <div className="h-full rounded-lg overflow-hidden">
             {loading ? (
               <Skeleton className="h-full w-full rounded-lg" />
             ) : (

@@ -9,53 +9,377 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      location_visits: {
+      badges: {
         Row: {
           id: string
-          is_gem: boolean
-          location_id: string
-          user_id: string
-          visited_at: string
+          name: string
+          description: string | null
+          requirement: string | null
+          icon_name: string | null
+          created_at: string
+          updated_at: string
         }
         Insert: {
           id?: string
-          is_gem?: boolean
-          location_id: string
-          user_id: string
-          visited_at?: string
+          name: string
+          description?: string | null
+          requirement?: string | null
+          icon_name?: string | null
+          created_at?: string
+          updated_at?: string
         }
         Update: {
           id?: string
-          is_gem?: boolean
-          location_id?: string
-          user_id?: string
-          visited_at?: string
+          name?: string
+          description?: string | null
+          requirement?: string | null
+          icon_name?: string | null
+          created_at?: string
+          updated_at?: string
         }
         Relationships: []
       }
-      profiles: {
+      categories: {
         Row: {
-          avatar_url: string | null
-          created_at: string
           id: string
+          name: string
+          icon_name: string | null
+          created_at: string
           updated_at: string
-          username: string | null
         }
         Insert: {
-          avatar_url?: string | null
+          id?: string
+          name: string
+          icon_name?: string | null
           created_at?: string
-          id: string
           updated_at?: string
-          username?: string | null
         }
         Update: {
-          avatar_url?: string | null
-          created_at?: string
           id?: string
+          name?: string
+          icon_name?: string | null
+          created_at?: string
           updated_at?: string
-          username?: string | null
         }
         Relationships: []
+      }
+      category_stats: {
+        Row: {
+          id: string
+          user_id: string
+          category_id: string
+          visit_count: number
+          last_visit_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          category_id: string
+          visit_count?: number
+          last_visit_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          category_id?: string
+          visit_count?: number
+          last_visit_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "category_stats_category_id_fkey"
+            columns: ["category_id"]
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "category_stats_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      cities: {
+        Row: {
+          id: string
+          name: string
+          state: string | null
+          country: string
+          latitude: number
+          longitude: number
+          image_url: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          state?: string | null
+          country: string
+          latitude: number
+          longitude: number
+          image_url?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          state?: string | null
+          country?: string
+          latitude?: number
+          longitude?: number
+          image_url?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      locations: {
+        Row: {
+          id: string
+          name: string
+          description: string | null
+          address: string | null
+          latitude: number
+          longitude: number
+          city_id: string
+          category_id: string | null
+          is_hidden_gem: boolean
+          difficulty_to_find: number | null
+          image_url: string | null
+          area: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          description?: string | null
+          address?: string | null
+          latitude: number
+          longitude: number
+          city_id: string
+          category_id?: string | null
+          is_hidden_gem?: boolean
+          difficulty_to_find?: number | null
+          image_url?: string | null
+          area?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          description?: string | null
+          address?: string | null
+          latitude?: number
+          longitude?: number
+          city_id?: string
+          category_id?: string | null
+          is_hidden_gem?: boolean
+          difficulty_to_find?: number | null
+          image_url?: string | null
+          area?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "locations_category_id_fkey"
+            columns: ["category_id"]
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "locations_city_id_fkey"
+            columns: ["city_id"]
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      location_visits: {
+        Row: {
+          id: string
+          user_id: string
+          location_id: string
+          visited_at: string
+          visit_month: number
+          visit_year: number
+          is_gem: boolean
+          rating: number | null
+          notes: string | null
+          shared: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          location_id: string
+          visited_at?: string
+          visit_month?: number
+          visit_year?: number
+          is_gem?: boolean
+          rating?: number | null
+          notes?: string | null
+          shared?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          location_id?: string
+          visited_at?: string
+          visit_month?: number
+          visit_year?: number
+          is_gem?: boolean
+          rating?: number | null
+          notes?: string | null
+          shared?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "location_visits_location_id_fkey"
+            columns: ["location_id"]
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "location_visits_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      profiles: {
+        Row: {
+          id: string
+          user_id: string
+          username: string | null
+          avatar_url: string | null
+          bio: string | null
+          preferences: Json | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          username?: string | null
+          avatar_url?: string | null
+          bio?: string | null
+          preferences?: Json | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          username?: string | null
+          avatar_url?: string | null
+          bio?: string | null
+          preferences?: Json | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      user_badges: {
+        Row: {
+          id: string
+          user_id: string
+          badge_id: string
+          earned_at: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          badge_id: string
+          earned_at?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          badge_id?: string
+          earned_at?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            referencedRelation: "badges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_badges_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      visit_history: {
+        Row: {
+          id: string
+          user_id: string
+          year: number
+          month: number
+          visit_count: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          year: number
+          month: number
+          visit_count?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          year?: number
+          month?: number
+          visit_count?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visit_history_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
       }
     }
     Views: {

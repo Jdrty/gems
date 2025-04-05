@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { Location } from '@/lib/mockData';
+import { Location } from '../types/location';
 import { useApp } from '@/context/AppContext';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -121,7 +121,7 @@ const CityMap = ({ onLocationSelect }: MapProps) => {
         markerElement.className = 'flex items-center justify-center';
         
         const markerInner = document.createElement('div');
-        const statusClass = location.isHiddenGem 
+        const statusClass = location.is_hidden_gem 
           ? 'bg-yellow-400 shadow-[0px_0px_4px_2px_rgba(250,204,21,0.7)]' 
           : isLocationVisited(location.id)
             ? 'bg-green-400 shadow-[0px_0px_4px_2px_rgba(74,222,128,0.7)]'
@@ -132,13 +132,13 @@ const CityMap = ({ onLocationSelect }: MapProps) => {
         markerElement.appendChild(markerInner);
         
         const marker = new mapboxgl.Marker(markerElement)
-          .setLngLat(location.coordinates)
+          .setLngLat([location.longitude, location.latitude])
           .setPopup(
             new mapboxgl.Popup({ offset: 25 })
               .setHTML(
                 `<div class="bg-zinc-900/95 p-2 rounded-lg border border-zinc-800">
                   <h3 class="font-bold text-sm text-zinc-100">${location.name}</h3>
-                  <p class="text-xs text-zinc-400">${location.description}</p>
+                  <p class="text-xs text-zinc-400">${location.description || ''}</p>
                 </div>`
               )
           )

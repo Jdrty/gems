@@ -1,7 +1,6 @@
-
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { MapPin, User, Home, LogOut, UserX } from 'lucide-react';
+import { MapPin, User, Home, LogOut, UserX, BarChart2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useApp } from '@/context/AppContext';
 import { Button } from './ui/button';
@@ -14,6 +13,7 @@ const NavBar = () => {
   
   const navItems = [
     { name: 'Map', path: '/', icon: Home },
+    { name: 'Stats', path: '/stats', icon: BarChart2 },
     { name: 'Profile', path: '/profile', icon: User, requiresAuth: true },
   ];
 
@@ -33,7 +33,7 @@ const NavBar = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-md border-b h-16">
-      <div className="container flex h-full items-center justify-between">
+      <div className="ml-10 container flex h-full items-center justify-between">
         <div className="flex items-center gap-2">
           <MapPin className="h-6 w-6 text-primary" />
           <span className="font-bold text-xl">CityTrove</span>
