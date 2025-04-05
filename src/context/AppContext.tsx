@@ -29,6 +29,7 @@ interface AppContextType {
   isGuestMode: boolean;
   setGuestMode: (value: boolean) => void;
   addLocation: (location: Omit<Location, 'id' | 'city_id'>) => Promise<void>;
+  deleteLocation: (locationId: string) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -311,6 +312,41 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const deleteLocation = async (locationId: string) => {
+    try {
+      // Find the location to be deleted
+      const locationToDelete = locations.find(loc => loc.id === locationId);
+      
+      if (!locationToDelete) {
+        throw new Error('Location not found');
+      }
+      
+      // Only allow deletion of user-uploaded locations
+      if (!locationToDelete.is_user_uploaded) {
+        toast.error('You can only delete locations that you have added');
+        return;
+      }
+      
+      // Remove the location from the state
+      setLocations(prevLocations => 
+        prevLocations.filter(location => location.id !== locationId)
+      );
+      
+      // If the location was visited, remove it from visited locations
+      if (visitedLocations.includes(locationId)) {
+        setVisitedLocations(prev => 
+          prev.filter(id => id !== locationId)
+        );
+      }
+      
+      toast.success('Location deleted successfully');
+    } catch (error) {
+      console.error('Error deleting location:', error);
+      toast.error('Failed to delete location');
+      throw error;
+    }
+  };
+
   return (
     <AppContext.Provider value={{
       locations,
@@ -320,7 +356,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       visitedLocations,
       isGuestMode,
       setGuestMode,
-      addLocation
+      addLocation,
+      deleteLocation
     }}>
       {children}
     </AppContext.Provider>

@@ -12,6 +12,7 @@ import {
   FolderPlus,
   Folder,
   Plus,
+  Trash2,
 } from "lucide-react";
 import {
   Dialog,
@@ -24,6 +25,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "sonner";
 
 interface CustomFolder {
   id: string;
@@ -36,7 +39,7 @@ interface LocationFoldersProps {
 }
 
 const LocationFolders = ({ onLocationSelect }: LocationFoldersProps) => {
-  const { locations, isLocationVisited } = useApp();
+  const { locations, isLocationVisited, deleteLocation } = useApp();
   const [expandedFolders, setExpandedFolders] = useState<
     Record<string, boolean>
   >({
@@ -46,6 +49,9 @@ const LocationFolders = ({ onLocationSelect }: LocationFoldersProps) => {
   const [customFolders, setCustomFolders] = useState<CustomFolder[]>([]);
   const [newFolderName, setNewFolderName] = useState("");
   const [showAddFolderDialog, setShowAddFolderDialog] = useState(false);
+  const [locationToDelete, setLocationToDelete] = useState<string | null>(null);
+  const [dontAskAgain, setDontAskAgain] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const toggleFolder = (folderName: string) => {
     setExpandedFolders((prev) => ({
@@ -117,6 +123,22 @@ const LocationFolders = ({ onLocationSelect }: LocationFoldersProps) => {
     );
   };
 
+  const handleDeleteLocation = async (locationId: string) => {
+    try {
+      await deleteLocation(locationId);
+      setShowDeleteDialog(false);
+      setLocationToDelete(null);
+      setDontAskAgain(false);
+    } catch (error) {
+      console.error("Error deleting location:", error);
+    }
+  };
+
+  const openDeleteDialog = (locationId: string) => {
+    setLocationToDelete(locationId);
+    setShowDeleteDialog(true);
+  };
+
   return (
     <div className="space-y-4">
       {/* Private Gems Folder */}
@@ -158,6 +180,19 @@ const LocationFolders = ({ onLocationSelect }: LocationFoldersProps) => {
                         <Check className="h-4 w-4 ml-auto text-yellow-500" />
                       )}
                     </Button>
+                    {location.is_user_uploaded && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-100"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openDeleteDialog(location.id);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
                 ))
               ) : (
@@ -196,18 +231,32 @@ const LocationFolders = ({ onLocationSelect }: LocationFoldersProps) => {
             <div className="space-y-2">
               {publicLocations.length > 0 ? (
                 publicLocations.map((location) => (
-                  <Button
-                    key={location.id}
-                    variant="ghost"
-                    className="w-full justify-start gap-2"
-                    onClick={() => onLocationSelect(location)}
-                  >
-                    <MapPin className="h-4 w-4" />
-                    <span className="truncate">{location.name}</span>
-                    {isLocationVisited(location.id) && (
-                      <Check className="h-4 w-4 ml-auto text-yellow-500" />
+                  <div key={location.id} className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      className="flex-grow justify-start gap-2"
+                      onClick={() => onLocationSelect(location)}
+                    >
+                      <MapPin className="h-4 w-4" />
+                      <span className="truncate">{location.name}</span>
+                      {isLocationVisited(location.id) && (
+                        <Check className="h-4 w-4 ml-auto text-yellow-500" />
+                      )}
+                    </Button>
+                    {location.is_user_uploaded && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-100"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openDeleteDialog(location.id);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     )}
-                  </Button>
+                  </div>
                 ))
               ) : (
                 <div className="text-center text-muted-foreground py-4">
@@ -218,6 +267,48 @@ const LocationFolders = ({ onLocationSelect }: LocationFoldersProps) => {
           </ScrollArea>
         )}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent className="sm:max-w-[425px] fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+          <DialogHeader>
+            <DialogTitle className="text-red-600">Delete Gem</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this gem? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="dont-ask-again" 
+                checked={dontAskAgain} 
+                onCheckedChange={(checked) => setDontAskAgain(checked as boolean)}
+              />
+              <Label htmlFor="dont-ask-again" className="text-sm text-muted-foreground">
+                Don't ask again
+              </Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowDeleteDialog(false);
+                setLocationToDelete(null);
+                setDontAskAgain(false);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={() => locationToDelete && handleDeleteLocation(locationToDelete)}
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
