@@ -183,11 +183,16 @@ const CityMap = forwardRef<MapRef, MapProps>(({ onLocationSelect }, ref) => {
               );
             }
 
-            hoveredStateId = feature.id as string;
-            newMap.setFeatureState(
-              { source: 'locations', id: hoveredStateId },
-              { hover: true }
-            );
+            // Only apply hover effect if the location is not visited
+            if (location && !isLocationVisited(location.id)) {
+              hoveredStateId = feature.id as string;
+              newMap.setFeatureState(
+                { source: 'locations', id: hoveredStateId },
+                { hover: true }
+              );
+            } else {
+              hoveredStateId = null;
+            }
 
             // Create or update popup
             if (location) {
@@ -233,6 +238,10 @@ const CityMap = forwardRef<MapRef, MapProps>(({ onLocationSelect }, ref) => {
         // Change cursor on hover
         newMap.on('mouseenter', 'locations', () => {
           newMap.getCanvas().style.cursor = 'pointer';
+        });
+
+        newMap.on('mouseleave', 'locations', () => {
+          newMap.getCanvas().style.cursor = '';
         });
 
         setMapInitialized(true);

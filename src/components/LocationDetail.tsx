@@ -56,7 +56,7 @@ const LocationDetail = ({ location, onLocationSelect }: LocationDetailProps) => 
           <div>
             <div className="flex items-center gap-2">
               <CardTitle className="text-xl">{location.name}</CardTitle>
-              {location.is_hidden_gem && (
+              {location.is_hidden_gem && !visited && (
                 <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">
                   <Star className="w-3 h-3 mr-1" />
                   Hidden Gem
