@@ -1,11 +1,13 @@
-
 import { useState } from 'react';
-import { Location } from '@/lib/mockData';
+import { Location } from '@/types/location';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Check, MapPin, UserX } from 'lucide-react';
+import { Check, MapPin, UserX, Star, MapPinned, Clock, Tag } from 'lucide-react';
 import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface LocationDetailProps {
   location: Location | null;
@@ -42,47 +44,84 @@ const LocationDetail = ({ location }: LocationDetailProps) => {
   const visited = isLocationVisited(location.id);
 
   return (
-    <div className="p-6 border rounded-lg h-full flex flex-col">
-      <div className="flex items-start justify-between mb-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <h3 className="text-xl font-semibold">{location.name}</h3>
+    <Card className="h-full flex flex-col border-none shadow-none bg-transparent">
+      <CardHeader className="pb-2">
+        <div className="flex items-start justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-xl">{location.name}</CardTitle>
+              {location.is_hidden_gem && (
+                <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">
+                  <Star className="w-3 h-3 mr-1" />
+                  Hidden Gem
+                </Badge>
+              )}
+            </div>
+            <CardDescription className="flex items-center gap-1 mt-1">
+              <MapPinned className="w-3.5 h-3.5" />
+              {location.area || 'Location'}
+            </CardDescription>
           </div>
-          <p className="text-sm text-muted-foreground">{location.type}</p>
+          {visited && (
+            <Badge className="bg-yellow-500/20 text-yellow-500 border-yellow-500/20">
+              <Check className="w-3.5 h-3.5 mr-1" />
+              Visited
+            </Badge>
+          )}
         </div>
-        {visited && (
-          <div className="bg-green-500/20 text-green-600 text-sm font-medium py-1 px-3 rounded-full flex items-center gap-1">
-            <Check className="w-4 h-4" />
-            Visited
-          </div>
-        )}
-      </div>
+      </CardHeader>
       
-      <p className="mb-6 flex-grow">{location.description}</p>
-      
-      <div className="space-y-3 mt-auto">
-        {isGuestMode && (
-          <div className="p-2 bg-amber-50 border border-amber-200 rounded-md mb-2 flex gap-2 items-center">
-            <UserX className="text-amber-500 w-4 h-4 flex-shrink-0" />
-            <p className="text-xs text-amber-700">
-              You're in guest mode. Visits won't be saved after you leave.
-            </p>
+      <CardContent className="flex-grow pb-2">
+        <div className="space-y-4">
+          <div className="bg-card/50 p-4 rounded-lg border">
+            <p className="text-sm leading-relaxed">{location.description}</p>
           </div>
-        )}
-        
-        <Button 
-          className="w-full"
-          disabled={visited || checkingIn}
-          onClick={handleCheckIn}
-        >
-          {checkingIn 
-            ? "Checking in..." 
-            : visited 
-              ? "Already Visited" 
-              : "Check In Here"}
-        </Button>
-      </div>
-    </div>
+          
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-card/50 p-3 rounded-lg border flex items-center gap-2">
+              <Clock className="w-4 h-4 text-muted-foreground" />
+              <div>
+                <p className="text-xs text-muted-foreground">Best Time</p>
+                <p className="text-sm font-medium">Anytime</p>
+              </div>
+            </div>
+            <div className="bg-card/50 p-3 rounded-lg border flex items-center gap-2">
+              <Tag className="w-4 h-4 text-muted-foreground" />
+              <div>
+                <p className="text-xs text-muted-foreground">Category</p>
+                <p className="text-sm font-medium">{location.category_id || 'Uncategorized'}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+      
+      <CardFooter className="pt-2">
+        <div className="w-full space-y-3">
+          {isGuestMode && (
+            <div className="p-2 bg-amber-500/10 border border-amber-500/20 rounded-md mb-2 flex gap-2 items-center">
+              <UserX className="text-amber-500 w-4 h-4 flex-shrink-0" />
+              <p className="text-xs text-amber-500">
+                You're in guest mode. Visits won't be saved after you leave.
+              </p>
+            </div>
+          )}
+          
+          <Button 
+            className="w-full"
+            disabled={visited || checkingIn}
+            onClick={handleCheckIn}
+            variant={visited ? "outline" : "default"}
+          >
+            {checkingIn 
+              ? "Checking in..." 
+              : visited 
+                ? "Already Visited" 
+                : "Check In Here"}
+          </Button>
+        </div>
+      </CardFooter>
+    </Card>
   );
 };
 

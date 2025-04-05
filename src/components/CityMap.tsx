@@ -86,19 +86,54 @@ const CityMap = ({ onLocationSelect }: MapProps) => {
           type: 'circle',
           source: 'locations',
           paint: {
-            'circle-radius': 6,
+            'circle-radius': [
+              'case',
+              ['boolean', ['feature-state', 'hover'], false],
+              8, // larger radius when hovered
+              6  // default radius
+            ],
             'circle-color': [
               'case',
               ['get', 'is_hidden_gem'],
-              '#4ade80', // green-400 for hidden gems
-              '#fbbf24' // yellow-400 for completed gems
+              [
+                'case',
+                ['boolean', ['feature-state', 'hover'], false],
+                '#86efac', // green-300 for hovered hidden gems
+                '#4ade80'  // green-400 for hidden gems
+              ],
+              [
+                'case',
+                ['get', 'is_visited'],
+                [
+                  'case',
+                  ['boolean', ['feature-state', 'hover'], false],
+                  '#fde047', // yellow-300 for hovered visited gems
+                  '#fbbf24'  // yellow-400 for visited gems
+                ],
+                '#22c55e'  // primary for available gems
+              ]
             ],
             'circle-stroke-width': 2,
             'circle-stroke-color': [
               'case',
               ['get', 'is_hidden_gem'],
-              'rgba(74, 222, 128, 0.7)', // green-400 with opacity for hidden gems
-              'rgba(250, 204, 21, 0.7)' // yellow-400 with opacity for completed gems
+              [
+                'case',
+                ['boolean', ['feature-state', 'hover'], false],
+                'rgba(134, 239, 172, 0.9)', // brighter green with opacity for hovered hidden gems
+                'rgba(74, 222, 128, 0.7)'   // green-400 with opacity for hidden gems
+              ],
+              [
+                'case',
+                ['get', 'is_visited'],
+                [
+                  'case',
+                  ['boolean', ['feature-state', 'hover'], false],
+                  'rgba(253, 224, 71, 0.9)',  // brighter yellow with opacity for hovered visited gems
+                  'rgba(250, 204, 21, 0.7)'   // yellow-400 with opacity for visited gems
+                ],
+                'rgba(59, 130, 246, 0.7)'     // primary with opacity for available gems
+              ]
             ]
           }
         });
@@ -114,12 +149,72 @@ const CityMap = ({ onLocationSelect }: MapProps) => {
           }
         });
 
+        // Add hover effect and popup
+        let popup: mapboxgl.Popup | null = null;
+        let hoveredStateId: string | null = null;
+
+        newMap.on('mousemove', 'locations', (e) => {
+          if (e.features && e.features[0]) {
+            const feature = e.features[0];
+            const location = locations.find(loc => loc.id === feature.properties.id);
+            
+            if (hoveredStateId !== null) {
+              newMap.setFeatureState(
+                { source: 'locations', id: hoveredStateId },
+                { hover: false }
+              );
+            }
+
+            hoveredStateId = feature.id as string;
+            newMap.setFeatureState(
+              { source: 'locations', id: hoveredStateId },
+              { hover: true }
+            );
+
+            // Create or update popup
+            if (location) {
+              const coordinates = [location.longitude, location.latitude];
+              
+              if (popup) {
+                popup.remove();
+              }
+
+              popup = new mapboxgl.Popup({
+                closeButton: false,
+                closeOnClick: false,
+                offset: 25
+              })
+                .setLngLat(coordinates as [number, number])
+                .setHTML(`
+                  <div class="bg-zinc-900/95 p-3 rounded-lg border border-zinc-800 min-w-[200px]">
+                    <h3 class="font-bold text-sm text-zinc-100 mb-1">${location.name}</h3>
+                    <p class="text-xs text-zinc-400">${location.description || ''}</p>
+                    ${location.is_hidden_gem ? '<div class="mt-2 text-xs text-green-400">✨ Hidden Gem</div>' : ''}
+                  </div>
+                `)
+                .addTo(newMap);
+            }
+          }
+        });
+
+        newMap.on('mouseleave', 'locations', () => {
+          if (hoveredStateId !== null) {
+            newMap.setFeatureState(
+              { source: 'locations', id: hoveredStateId },
+              { hover: false }
+            );
+            hoveredStateId = null;
+          }
+          if (popup) {
+            popup.remove();
+            popup = null;
+          }
+          newMap.getCanvas().style.cursor = '';
+        });
+
         // Change cursor on hover
         newMap.on('mouseenter', 'locations', () => {
           newMap.getCanvas().style.cursor = 'pointer';
-        });
-        newMap.on('mouseleave', 'locations', () => {
-          newMap.getCanvas().style.cursor = '';
         });
 
         setMapInitialized(true);
@@ -202,8 +297,12 @@ const CityMap = ({ onLocationSelect }: MapProps) => {
       <div ref={mapContainer} className="w-full h-full" />
       <div className="bg-zinc-900/90 absolute bottom-8 left-4 flex flex-col gap-2 p-3 rounded-lg border border-zinc-800">
         <div className="flex items-center gap-2">
+          <div className="h-3 w-3 rounded-full bg-primary shadow-[0px_0px_4px_2px_rgba(59,130,246,0.7)]" />
+          <div className="text-sm text-zinc-300">Available</div>
+        </div>
+        <div className="flex items-center gap-2">
           <div className="h-3 w-3 rounded-full bg-yellow-400 shadow-[0px_0px_4px_2px_rgba(250,204,21,0.7)]" />
-          <div className="text-sm text-zinc-300">Completed Gem</div>
+          <div className="text-sm text-zinc-300">Visited</div>
         </div>
         <div className="flex items-center gap-2">
           <div className="h-3 w-3 rounded-full bg-green-400 shadow-[0px_0px_4px_2px_rgba(74,222,128,0.7)]" />
