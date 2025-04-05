@@ -3,7 +3,7 @@ import { useApp } from '@/context/AppContext';
 import { Location } from '@/types/location';
 import { MapPin, Star, Clock, ArrowUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import {
   Select,
@@ -23,7 +23,15 @@ const Explore = () => {
   const navigate = useNavigate();
 
   const handleViewGem = (location: Location) => {
-    navigate('/', { state: { selectedLocation: location } });
+    navigate('/', { 
+      state: { 
+        selectedLocation: {
+          ...location,
+          latitude: Number(location.latitude),
+          longitude: Number(location.longitude)
+        } 
+      } 
+    });
   };
 
   const sortLocations = (locs: Location[]) => {
@@ -106,7 +114,7 @@ const Explore = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {sortedLocations.map((location) => (
-            <Card key={location.id} className="overflow-hidden">
+            <Card key={location.id} className="overflow-hidden flex flex-col">
               <CardHeader className="pb-4">
                 <div className="flex justify-between items-start">
                   <div>
@@ -125,17 +133,19 @@ const Explore = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground line-clamp-2 mb-4">
+                <p className="text-muted-foreground line-clamp-2">
                   {location.description}
                 </p>
+              </CardContent>
+              <CardFooter className="mt-auto pt-4">
                 <Button 
-                  variant="outline" 
+                  variant="default" 
                   className="w-full"
                   onClick={() => handleViewGem(location)}
                 >
                   View Gem
                 </Button>
-              </CardContent>
+              </CardFooter>
             </Card>
           ))}
         </div>
