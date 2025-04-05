@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import {
@@ -21,18 +21,6 @@ interface AddLocationButtonProps {
   onLocationAdded?: (coordinates: [number, number]) => void;
 }
 
-// Define the form state type
-interface FormState {
-  open: boolean;
-  title: string;
-  description: string;
-  latitude: string;
-  longitude: string;
-  difficulty: number;
-}
-
-const STORAGE_KEY = 'addLocationFormState';
-
 const AddLocationButton = ({ onLocationAdded }: AddLocationButtonProps) => {
   const { addLocation } = useApp();
   const [open, setOpen] = useState(false);
@@ -51,13 +39,13 @@ const AddLocationButton = ({ onLocationAdded }: AddLocationButtonProps) => {
       return;
     }
     
-    if (!formState.latitude.trim() || !formState.longitude.trim()) {
+    if (!latitude.trim() || !longitude.trim()) {
       toast.error('Please enter valid coordinates');
       return;
     }
     
-    const lat = parseFloat(formState.latitude);
-    const lng = parseFloat(formState.longitude);
+    const lat = parseFloat(latitude);
+    const lng = parseFloat(longitude);
     
     if (isNaN(lat) || isNaN(lng)) {
       toast.error('Please enter valid numbers for coordinates');
@@ -115,10 +103,7 @@ const AddLocationButton = ({ onLocationAdded }: AddLocationButtonProps) => {
   };
 
   return (
-    <Dialog 
-      open={formState.open} 
-      onOpenChange={(open) => setFormState(prev => ({ ...prev, open }))}
-    >
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button size="sm" className="gap-2">
           <Plus className="w-4 h-4" />
@@ -206,11 +191,11 @@ const AddLocationButton = ({ onLocationAdded }: AddLocationButtonProps) => {
               </RadioGroup>
             </div>
             <p className="text-xs text-muted-foreground">
-              {formState.difficulty === 1 && 'Very easy to find'}
-              {formState.difficulty === 2 && 'Easy to find'}
-              {formState.difficulty === 3 && 'Moderate difficulty'}
-              {formState.difficulty === 4 && 'Hard to find'}
-              {formState.difficulty === 5 && 'Very hard to find'}
+              {difficulty === '1' && 'Very easy to find'}
+              {difficulty === '2' && 'Easy to find'}
+              {difficulty === '3' && 'Moderate difficulty'}
+              {difficulty === '4' && 'Hard to find'}
+              {difficulty === '5' && 'Very hard to find'}
             </p>
           </div>
           <DialogFooter>
