@@ -58,12 +58,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
           throw error;
         }
 
-        // Convert Location to AppLocation
-        const appLocations: AppLocation[] = (data as Location[]).map(location => ({
-          ...location,
-          is_private: false, // Default to false for existing locations
-          is_user_uploaded: false // Default to false for existing locations
-        }));
+        // Convert Location to AppLocation and filter out test locations
+        const appLocations: AppLocation[] = (data as Location[])
+          .filter(location => !location.name.toLowerCase().includes('test'))
+          .map(location => ({
+            ...location,
+            is_private: false, // Default to false for existing locations
+            is_user_uploaded: false // Default to false for existing locations
+          }));
 
         setLocations(appLocations);
       } catch (error) {
@@ -147,17 +149,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (isGuestMode || !user) {
       if (isGuestMode) {
         setVisitedLocations(prev => {
-          if (prev.includes(locationId)) return prev;
+          if (prev.includes(locationId)) {
+            return prev.filter(id => id !== locationId);
+          }
           return [...prev, locationId];
         });
-        toast.success('Location marked as visited (guest mode)');
+        toast.success(visitedLocations.includes(locationId) ? 'Location unmarked as visited' : 'Location marked as visited (guest mode)');
       } else {
         toast.error('You must be logged in to check in');
       }
       return;
     }
-    
-    if (visitedLocations.includes(locationId)) return;
     
     try {
       const location = locations.find(loc => loc.id === locationId);
@@ -165,107 +167,122 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       // For user-uploaded locations, just update the local state
       if (location.is_user_uploaded) {
-        setVisitedLocations(prev => [...prev, locationId]);
-        toast.success('Checked in successfully! ✅');
+        setVisitedLocations(prev => {
+          if (prev.includes(locationId)) {
+            return prev.filter(id => id !== locationId);
+          }
+          return [...prev, locationId];
+        });
+        toast.success(visitedLocations.includes(locationId) ? 'Location unmarked as visited' : 'Checked in successfully! ✅');
         return;
       }
 
-      // For non-user-uploaded locations, save to the database
-      const { error: visitError } = await supabase
-        .from('location_visits')
-        .insert({
-          user_id: user.id,
-          location_id: locationId,
-          is_gem: location.is_hidden_gem
-        });
-
-      if (visitError) throw visitError;
-
-      // Update category stats
-      if (location.category_id) {
-        const { data: existingStats, error: statsError } = await supabase
-          .from('category_stats')
-          .select('*')
+      // Check if location is already visited
+      if (visitedLocations.includes(locationId)) {
+        // Unmark as visited
+        const { error: deleteError } = await supabase
+          .from('location_visits')
+          .delete()
           .eq('user_id', user.id)
-          .eq('category_id', location.category_id)
-          .single();
+          .eq('location_id', locationId);
 
-        if (statsError && statsError.code !== 'PGRST116') { // PGRST116 is "not found" error
-          throw statsError;
+        if (deleteError) throw deleteError;
+
+        // Update category stats
+        if (location.category_id) {
+          const { data: existingStats, error: statsError } = await supabase
+            .from('category_stats')
+            .select('*')
+            .eq('user_id', user.id)
+            .eq('category_id', location.category_id)
+            .single();
+
+          if (statsError && statsError.code !== 'PGRST116') {
+            throw statsError;
+          }
+
+          if (existingStats) {
+            const newCount = Math.max(0, existingStats.visit_count - 1);
+            if (newCount === 0) {
+              // Delete the stats record if count reaches 0
+              const { error: deleteStatsError } = await supabase
+                .from('category_stats')
+                .delete()
+                .eq('id', existingStats.id);
+
+              if (deleteStatsError) throw deleteStatsError;
+            } else {
+              // Update existing stats
+              const { error: updateError } = await supabase
+                .from('category_stats')
+                .update({
+                  visit_count: newCount,
+                  last_visit_at: new Date().toISOString()
+                })
+                .eq('id', existingStats.id);
+
+              if (updateError) throw updateError;
+            }
+          }
         }
 
-        if (existingStats) {
-          // Update existing stats
-          const { error: updateError } = await supabase
-            .from('category_stats')
-            .update({
-              visit_count: existingStats.visit_count + 1,
-              last_visit_at: new Date().toISOString()
-            })
-            .eq('id', existingStats.id);
-
-          if (updateError) throw updateError;
-        } else {
-          // Create new stats
-          const { error: insertError } = await supabase
-            .from('category_stats')
-            .insert({
-              user_id: user.id,
-              category_id: location.category_id,
-              visit_count: 1,
-              last_visit_at: new Date().toISOString()
-            });
-
-          if (insertError) throw insertError;
-        }
-      }
-
-      // Update visit history
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = now.getMonth() + 1;
-
-      const { data: existingHistory, error: historyError } = await supabase
-        .from('visit_history')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('year', year)
-        .eq('month', month)
-        .single();
-
-      if (historyError && historyError.code !== 'PGRST116') {
-        throw historyError;
-      }
-
-      if (existingHistory) {
-        // Update existing history
-        const { error: updateError } = await supabase
-          .from('visit_history')
-          .update({
-            visit_count: existingHistory.visit_count + 1
-          })
-          .eq('id', existingHistory.id);
-
-        if (updateError) throw updateError;
+        setVisitedLocations(prev => prev.filter(id => id !== locationId));
+        toast.success('Location unmarked as visited');
       } else {
-        // Create new history
-        const { error: insertError } = await supabase
-          .from('visit_history')
+        // Mark as visited (existing code)
+        const { error: visitError } = await supabase
+          .from('location_visits')
           .insert({
             user_id: user.id,
-            year,
-            month,
-            visit_count: 1
+            location_id: locationId,
+            is_gem: location.is_hidden_gem
           });
 
-        if (insertError) throw insertError;
-      }
+        if (visitError) throw visitError;
 
-      setVisitedLocations(prev => [...prev, locationId]);
-      toast.success('Checked in successfully! ✅');
+        // Update category stats
+        if (location.category_id) {
+          const { data: existingStats, error: statsError } = await supabase
+            .from('category_stats')
+            .select('*')
+            .eq('user_id', user.id)
+            .eq('category_id', location.category_id)
+            .single();
+
+          if (statsError && statsError.code !== 'PGRST116') {
+            throw statsError;
+          }
+
+          if (existingStats) {
+            const { error: updateError } = await supabase
+              .from('category_stats')
+              .update({
+                visit_count: existingStats.visit_count + 1,
+                last_visit_at: new Date().toISOString()
+              })
+              .eq('id', existingStats.id);
+
+            if (updateError) throw updateError;
+          } else {
+            const { error: insertError } = await supabase
+              .from('category_stats')
+              .insert({
+                user_id: user.id,
+                category_id: location.category_id,
+                visit_count: 1,
+                last_visit_at: new Date().toISOString()
+              });
+
+            if (insertError) throw insertError;
+          }
+        }
+
+        setVisitedLocations(prev => [...prev, locationId]);
+        toast.success('Checked in successfully! ✅');
+      }
     } catch (error) {
-      console.error('Failed to mark location as visited:', error);
-      toast.error('Failed to check in. Please try again.');
+      console.error('Failed to toggle location visit status:', error);
+      toast.error('Failed to update visit status. Please try again.');
     }
   };
 
@@ -362,6 +379,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
         toast.error('You can only delete locations that you have added');
         return;
       }
+
+      // Delete from database
+      const { error: deleteError } = await supabase
+        .from('locations')
+        .delete()
+        .eq('id', locationId);
+
+      if (deleteError) {
+        throw deleteError;
+      }
       
       // Remove the location from the state
       setLocations(prevLocations => 
@@ -371,6 +398,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
       // If the location was visited, remove it from visited locations
       if (visitedLocations.includes(locationId)) {
         setVisitedLocations(prev => 
+          prev.filter(id => id !== locationId)
+        );
+      }
+
+      // If the location was favorited, remove it from favorites
+      if (favoriteLocations.includes(locationId)) {
+        setFavoriteLocations(prev =>
           prev.filter(id => id !== locationId)
         );
       }

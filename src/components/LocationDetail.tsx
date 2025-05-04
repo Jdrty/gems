@@ -12,6 +12,7 @@ import {
   Clock,
   Tag,
   ChevronLeft,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -35,7 +36,7 @@ const LocationDetail = ({
   location,
   onLocationSelect,
 }: LocationDetailProps) => {
-  const { markLocationVisited, isLocationVisited, isGuestMode } = useApp();
+  const { markLocationVisited, isLocationVisited, isGuestMode, deleteLocation } = useApp();
   const { user } = useAuth();
   const [checkingIn, setCheckingIn] = useState(false);
 
@@ -161,18 +162,42 @@ const LocationDetail = ({
             </p>
           </div>
         )}
-        <Button
-          className="w-full"
-          disabled={visited || checkingIn}
-          onClick={handleCheckIn}
-          variant={visited ? "outline" : "default"}
-        >
-          {checkingIn
-            ? "Checking in..."
-            : visited
-            ? "Already Visited"
-            : "Check In Here"}
-        </Button>
+        <div className="space-y-2">
+          <Button
+            className="w-full"
+            disabled={checkingIn}
+            onClick={handleCheckIn}
+            variant={visited ? "outline" : "default"}
+          >
+            {checkingIn
+              ? "Updating..."
+              : visited
+              ? "Mark as Unvisited"
+              : "Check In Here"}
+          </Button>
+          
+          {location.is_user_uploaded && (
+            <Button
+              className="w-full"
+              variant="destructive"
+              onClick={async () => {
+                if (window.confirm('Are you sure you want to delete this gem? This action cannot be undone.')) {
+                  try {
+                    await deleteLocation(location.id);
+                    toast.success('Gem deleted successfully');
+                    onLocationSelect?.(null);
+                  } catch (error) {
+                    console.error('Failed to delete gem:', error);
+                    toast.error('Failed to delete gem');
+                  }
+                }
+              }}
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete Gem
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -37,7 +37,7 @@ const NavBar = () => {
     <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-md border-b h-16">
       <div className="flex h-full items-center justify-between px-4">
         <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <img src="public/gem.png" alt="logo" className="h-6 w-6" />
+          <img src="/avatar1.jpg" alt="profile" className="h-8 w-8 rounded-full object-cover" />
           <span className="font-bold text-xl">Gems</span>
         </Link>
 
