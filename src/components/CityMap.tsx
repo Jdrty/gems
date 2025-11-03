@@ -22,7 +22,7 @@ export interface MapRef {
   resetView: () => void;
 }
 
-const DEFAULT_CENTER: [number, number] = [-79.3855, 43.6455];
+const DEFAULT_CENTER: [number, number] = [-79.3865, 43.6445];
 const DEFAULT_ZOOM = 16.2;
 const DEFAULT_PITCH = 60;
 const DEFAULT_BEARING = -20;
