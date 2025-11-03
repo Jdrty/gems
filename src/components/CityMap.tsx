@@ -21,8 +21,8 @@ const CityMap = forwardRef<MapRef, MapProps>(({ onLocationSelect }, ref) => {
   const [mapInitialized, setMapInitialized] = useState(false);
   const { locations, isLocationVisited } = useApp();
   
-  // Toronto coordinates
-  const [center, setCenter] = useState<[number, number]>([-79.3832, 43.6532]);
+  // Default to the CN Tower in Toronto on initial load
+  const [center, setCenter] = useState<[number, number]>([-79.3871, 43.6426]);
   const [zoom, setZoom] = useState(15.5);
   const [pitch, setPitch] = useState(52);
   const [bearing, setBearing] = useState(-20);
