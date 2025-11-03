@@ -1,6 +1,6 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { MapPin, User, Home, LogOut, UserX, BarChart2, Compass } from "lucide-react";
+import { User, Home, LogOut, UserX, BarChart2, Compass } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useApp } from "@/context/AppContext";
 import { Button } from "./ui/button";
@@ -9,8 +9,11 @@ import gemsLogo from "@/assets/gems-logo.png";
 
 const NavBar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { isGuestMode, setGuestMode } = useApp();
+
+  const logoLinkTarget = user ? "/" : "/auth";
 
   const navItems = [
     { name: "Map", path: "/", icon: Home },
@@ -22,10 +25,19 @@ const NavBar = () => {
   const handleSignOut = async () => {
     if (isGuestMode) {
       setGuestMode(false);
-      toast.success("Exited guest mode");
-    } else {
+      toast.info("Sign in to save your progress");
+      navigate("/auth");
+      return;
+    }
+
+    try {
       await signOut();
-      toast.success("Signed out successfully");
+      setGuestMode(true);
+      toast.success("Signed out successfully. You're browsing in guest mode.");
+      navigate("/");
+    } catch (error) {
+      console.error("Failed to sign out:", error);
+      toast.error("Failed to sign out. Please try again.");
     }
   };
 
@@ -37,7 +49,7 @@ const NavBar = () => {
   return (
     <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-md border-b h-16">
       <div className="flex h-full items-center justify-between px-4">
-        <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+        <Link to={logoLinkTarget} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <img src={gemsLogo} alt="Gems logo" className="h-8 w-8 rounded-full object-cover" />
           <span className="font-bold text-xl">Gems</span>
         </Link>
@@ -77,7 +89,7 @@ const NavBar = () => {
                   className="text-muted-foreground hover:text-foreground"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
-                  {isGuestMode ? "Exit Guest Mode" : "Sign Out"}
+                  {isGuestMode ? "Log In" : "Sign Out"}
                 </Button>
               </div>
             </>

@@ -67,13 +67,23 @@ const Home = () => {
   };
 
   const handleLocationSelect = (location: Location | null) => {
-    setSelectedLocation(location);
-    if (location && mapRef.current) {
-      mapRef.current.centerOnCoordinates([
-        location.longitude,
-        location.latitude,
-      ]);
-    }
+    setSelectedLocation((prev) => {
+      if (location && prev && prev.id === location.id) {
+        mapRef.current?.resetView();
+        return null;
+      }
+
+      if (location) {
+        mapRef.current?.centerOnCoordinates([
+          location.longitude,
+          location.latitude,
+        ]);
+      } else {
+        mapRef.current?.resetView();
+      }
+
+      return location;
+    });
   };
 
   const handleBackToExplore = () => {
